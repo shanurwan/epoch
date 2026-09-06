@@ -1,0 +1,9 @@
+{
+  "go_version": "go1.26.8",
+  "platform": "linux/amd64",
+  "source": "https://go.dev/dl/go1.26.8.linux-amd64.tar.gz",
+  "sha256": "d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b",
+  "size_bytes": 66897291,
+  "checksum_origin": "upstream-published",
+  "metadata_source": "https://go.dev/dl/?mode=json"
+}

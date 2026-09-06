@@ -1,0 +1,15 @@
+/epoch.local.json
+/bin/
+/.tools/
+/.cache/
+/.tmp/
+/runs/
+*.test
+*.ext4
+*.img
+*.squashfs
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+coverage.out

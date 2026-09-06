@@ -1,0 +1,6 @@
+[Unit]
+Description=Epoch isolated guest control target
+DefaultDependencies=no
+Requires=epoch-agent.service
+After=epoch-agent.service
+AllowIsolate=yes

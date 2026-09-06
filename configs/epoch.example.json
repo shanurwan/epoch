@@ -1,0 +1,17 @@
+{
+  "api_version": "epoch-config/v1",
+  "firecracker_path": "~/epoch-lab/tools/firecracker-v1.16.1-x86_64/release-v1.16.1-x86_64/firecracker-v1.16.1-x86_64",
+  "artifact_manifest_dir": "~/epoch-lab/artifacts/manifests",
+  "evidence_dir": "~/epoch-lab/run-evidence",
+  "runtime_root": "~/epoch-lab/runtime",
+  "guest_cid": 3,
+  "guest_port": 7000,
+  "policy": {
+    "max_vcpus": 2,
+    "max_memory_mib": 2048,
+    "max_disk_bytes": 4294967296,
+    "reserve_bytes": 5368709120,
+    "max_timeout_ms": 600000,
+    "host_clock_threshold_ms": 250
+  }
+}

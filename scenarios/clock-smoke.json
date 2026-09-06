@@ -1,0 +1,74 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "clock-smoke-1999",
+  "image": "epoch-clock-probe-v1",
+  "workload": "clock-probe",
+  "resources": {
+    "vcpu_count": 1,
+    "memory_mib": 512
+  },
+  "timeout_ms": 120000,
+  "boot_timeout_ms": 30000,
+  "steps": [
+    {
+      "id": "past",
+      "op": "clock.set",
+      "at": "1999-12-31T23:59:00Z"
+    },
+    {
+      "id": "before",
+      "op": "action.exec",
+      "action": "observe",
+      "timeout_ms": 5000
+    },
+    {
+      "id": "record",
+      "op": "action.exec",
+      "action": "write-marker",
+      "input": {
+        "value": "persist-me"
+      },
+      "timeout_ms": 5000
+    },
+    {
+      "id": "future",
+      "op": "clock.set",
+      "at": "2000-01-01T00:01:00Z"
+    },
+    {
+      "id": "after",
+      "op": "action.exec",
+      "action": "observe",
+      "timeout_ms": 5000
+    },
+    {
+      "id": "read",
+      "op": "action.exec",
+      "action": "read-marker",
+      "timeout_ms": 5000
+    }
+  ],
+  "assertions": [
+    {
+      "id": "past-year",
+      "step": "before",
+      "pointer": "/stdout_json/year_utc",
+      "op": "eq",
+      "value": 1999
+    },
+    {
+      "id": "future-year",
+      "step": "after",
+      "pointer": "/stdout_json/year_utc",
+      "op": "eq",
+      "value": 2000
+    },
+    {
+      "id": "state-preserved",
+      "step": "read",
+      "pointer": "/stdout_json/value",
+      "op": "eq",
+      "value": "persist-me"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "fault-large-output",
+  "image": "epoch-clock-probe-v1",
+  "workload": "clock-probe",
+  "steps": [
+    {
+      "id": "initial",
+      "op": "clock.set",
+      "at": "2000-01-01T12:00:00Z"
+    },
+    {
+      "id": "probe",
+      "op": "action.exec",
+      "action": "large-output",
+      "timeout_ms": 5000
+    }
+  ],
+  "assertions": [
+    {
+      "id": "action-exit",
+      "step": "probe",
+      "pointer": "/exit_code",
+      "op": "eq",
+      "value": 0
+    }
+  ]
+}

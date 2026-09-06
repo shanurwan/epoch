@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://epoch.invalid/schemas/scenario.schema.json",
+  "title": "Epoch scenario v1alpha1",
+  "description": "Structural contract. Epoch also enforces duplicate-key rejection, bounded numeric literals, clock range, cross references, budgets and service chronology before launch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "name",
+    "image",
+    "workload",
+    "steps",
+    "assertions"
+  ],
+  "properties": {
+    "api_version": {
+      "const": "epoch/v1alpha1"
+    },
+    "name": {
+      "$ref": "#/$defs/id"
+    },
+    "image": {
+      "$ref": "#/$defs/workload_id"
+    },
+    "workload": {
+      "$ref": "#/$defs/workload_id"
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vcpu_count",
+        "memory_mib"
+      ],
+      "properties": {
+        "vcpu_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "default": 1
+        },
+        "memory_mib": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 2048,
+          "default": 512
+        }
+      }
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600000,
+      "default": 120000
+    },
+    "boot_timeout_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600000,
+      "default": 30000
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/assertion"
+      }
+    }
+  },
+  "$defs": {
+    "workload_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$"
+    },
+    "timeout": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600000,
+      "default": 5000
+    },
+    "step": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "clock.read"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op",
+            "at"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "clock.set"
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+            },
+            "allow_live": {
+              "type": "boolean",
+              "default": false
+            },
+            "tolerance_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1000
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op",
+            "action"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "action.exec"
+            },
+            "action": {
+              "$ref": "#/$defs/workload_id"
+            },
+            "input": {},
+            "timeout_ms": {
+              "$ref": "#/$defs/timeout"
+            },
+            "expected_exit_code": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255,
+              "default": 0
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op",
+            "service"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "service.start"
+            },
+            "service": {
+              "$ref": "#/$defs/workload_id"
+            },
+            "input": {},
+            "timeout_ms": {
+              "$ref": "#/$defs/timeout"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op",
+            "service"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "service.stop"
+            },
+            "service": {
+              "$ref": "#/$defs/workload_id"
+            },
+            "timeout_ms": {
+              "$ref": "#/$defs/timeout"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "op",
+            "duration_ms"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "op": {
+              "const": "wait"
+            },
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 599999
+            }
+          }
+        }
+      ]
+    },
+    "assertion": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "step",
+            "pointer",
+            "op",
+            "value"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "step": {
+              "$ref": "#/$defs/id"
+            },
+            "pointer": {
+              "type": "string",
+              "maxLength": 4096,
+              "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+            },
+            "op": {
+              "enum": [
+                "eq",
+                "ne"
+              ]
+            },
+            "value": {}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "step",
+            "pointer",
+            "op",
+            "value"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "step": {
+              "$ref": "#/$defs/id"
+            },
+            "pointer": {
+              "type": "string",
+              "maxLength": 4096,
+              "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+            },
+            "op": {
+              "enum": [
+                "gt",
+                "gte",
+                "lt",
+                "lte"
+              ]
+            },
+            "value": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "step",
+            "pointer",
+            "op"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "step": {
+              "$ref": "#/$defs/id"
+            },
+            "pointer": {
+              "type": "string",
+              "maxLength": 4096,
+              "pattern": "^(?:/(?:[^~]|~[01])*)*$"
+            },
+            "op": {
+              "enum": [
+                "exists",
+                "absent"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "status": "candidate inputs; not a boot-verified Epoch image",
+  "selection": "Explicit objects observed in the published v1.15 guest artifact listing; Firecracker executable remains pinned to v1.16.1. Compatibility requires an opt-in guest boot.",
+  "listing": "https://s3.amazonaws.com/spec.ccfc.min/?list-type=2&prefix=firecracker-ci%2Fv1.15%2Fx86_64%2F&max-keys=1000",
+  "checksum_origin": "locally-observed",
+  "hash_limit": "Content identities measured after HTTPS acquisition, not published signatures or proof of provenance.",
+  "inputs": [
+    {
+      "url": "https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/v1.15/x86_64/vmlinux-6.1.155",
+      "size_bytes": 44279576,
+      "sha256": "e20e46d0c36c55c0d1014eb20576171b3f3d922260d9f792017aeff53af3d4f2"
+    },
+    {
+      "url": "https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/v1.15/x86_64/vmlinux-6.1.155.config",
+      "size_bytes": 91827,
+      "sha256": "024b2aae62fe7131f9a9ab80f27619c882c0a37265dd105adae01d2867bef7c3"
+    },
+    {
+      "url": "https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/v1.15/x86_64/ubuntu-24.04.squashfs",
+      "size_bytes": 107986944,
+      "sha256": "68321e0482baeb3844dafe8a6b08a6902401a7afc41fbfd8c3d9ea08aadd244f"
+    },
+    {
+      "url": "https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/v1.15/x86_64/ubuntu-24.04.manifest",
+      "size_bytes": 6829,
+      "sha256": "a393f2b2d61c0ee5d6e11d8d72e46de4659fc57e7719624942a72dfa87ed851e"
+    }
+  ],
+  "kernel_config_observations": {
+    "CONFIG_VSOCKETS": "y",
+    "CONFIG_VIRTIO_VSOCKETS": "y",
+    "CONFIG_VIRTIO_BLK": "y",
+    "CONFIG_EXT4_FS": "y",
+    "CONFIG_DEVTMPFS": "y",
+    "CONFIG_DEVTMPFS_MOUNT": "y"
+  }
+}

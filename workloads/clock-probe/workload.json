@@ -1,0 +1,24 @@
+{
+  "api_version": "epoch-workload/v1",
+  "id": "clock-probe",
+  "version": "1",
+  "uid": 10001,
+  "gid": 10001,
+  "working_dir": "/var/lib/epoch-workload",
+  "environment": {},
+  "actions": {
+    "observe": {"argv": ["/usr/local/libexec/clock-probe", "observe"]},
+    "write-marker": {"argv": ["/usr/local/libexec/clock-probe", "write-marker"]},
+    "read-marker": {"argv": ["/usr/local/libexec/clock-probe", "read-marker"]},
+    "sleep": {"argv": ["/usr/local/libexec/clock-probe", "sleep"]},
+    "hang": {"argv": ["/usr/local/libexec/clock-probe", "hang"]},
+    "large-output": {"argv": ["/usr/local/libexec/clock-probe", "large-output"]},
+    "large-stderr": {"argv": ["/usr/local/libexec/clock-probe", "large-stderr"]},
+    "malformed-json": {"argv": ["/usr/local/libexec/clock-probe", "malformed-json"]},
+    "nonzero": {"argv": ["/usr/local/libexec/clock-probe", "nonzero"]},
+    "service-ready": {"argv": ["/usr/local/libexec/clock-probe", "service-ready"]}
+  },
+  "services": {
+    "probe": {"argv": ["/usr/local/libexec/clock-probe", "service"], "readiness_action": "service-ready"}
+  }
+}

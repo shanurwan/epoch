@@ -1,0 +1,25 @@
+[Unit]
+Description=Epoch guest control agent
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/libexec/epoch-agent --manifest /etc/epoch/workload.json
+User=root
+Group=root
+UMask=0077
+Restart=no
+KillMode=control-group
+TimeoutStopSec=10s
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_TIME CAP_SETUID CAP_SETGID CAP_KILL
+RestrictAddressFamilies=AF_UNIX AF_VSOCK AF_INET AF_INET6
+LimitCORE=0
+StandardInput=null
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/console
+TTYReset=no
+TTYVHangup=no

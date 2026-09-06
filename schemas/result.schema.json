@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://epoch.invalid/schemas/result.schema.json",
+  "title": "Epoch final result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "run_id",
+    "scenario_name",
+    "temporal_mode",
+    "execution_status",
+    "assertion_status",
+    "cleanup_status",
+    "started_at",
+    "finished_at",
+    "elapsed_ns",
+    "stage",
+    "steps",
+    "assertions",
+    "causes"
+  ],
+  "properties": {
+    "api_version": {
+      "const": "epoch-result/v1"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "scenario_name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$"
+    },
+    "temporal_mode": {
+      "const": "guest-wall-clock-step/v1"
+    },
+    "execution_status": {
+      "enum": [
+        "COMPLETED",
+        "ERROR",
+        "CANCELLED",
+        "INTERRUPTED"
+      ]
+    },
+    "assertion_status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_EVALUATED"
+      ]
+    },
+    "cleanup_status": {
+      "enum": [
+        "COMPLETE",
+        "INCOMPLETE"
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "elapsed_ns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stage": {
+      "enum": [
+        "VALIDATING",
+        "PREPARING",
+        "BOOTING",
+        "READY",
+        "RUNNING",
+        "COLLECTING",
+        "CLEANING",
+        "FINISHED"
+      ]
+    },
+    "steps": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/assertion"
+      }
+    },
+    "causes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "description": "A successful run requires COMPLETED, PASS and COMPLETE together. Partial evaluated assertions may remain after an execution error. Successful rename does not guarantee survival of arbitrary storage faults.",
+  "$defs": {
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "op",
+        "elapsed_ns"
+      ],
+      "anyOf": [
+        {"required": ["result"]},
+        {"required": ["error"]}
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "op": {
+          "enum": [
+            "clock.read",
+            "clock.set",
+            "action.exec",
+            "service.start",
+            "service.stop",
+            "wait"
+          ]
+        },
+        "elapsed_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result": {},
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {
+            "code": {"type": "string", "minLength": 1},
+            "message": {"type": "string", "minLength": 1},
+            "details": {}
+          }
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "step",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "step": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "actual": {},
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

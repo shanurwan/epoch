@@ -8,7 +8,7 @@ Epoch is an application-independent temporal-testing platform for stateful Linux
 
 ## 1. Scope and acceptance gate
 
-This procedure starts **after Linux installation and working SSH access**. Run commands in a Bash session on the Rocky host—not in an unconnected Windows Git Bash prompt.
+This procedure starts **after Linux installation and working SSH access**. Run commands in a Bash session on the bare-metal Rocky Linux host.
 
 | Area | Bootstrap profile |
 | --- | --- |

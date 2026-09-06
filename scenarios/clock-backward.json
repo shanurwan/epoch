@@ -1,0 +1,52 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "clock-backward",
+  "image": "epoch-clock-probe-v1",
+  "workload": "clock-probe",
+  "steps": [
+    {
+      "id": "initial",
+      "op": "clock.set",
+      "at": "2040-06-01T12:00:00Z"
+    },
+    {
+      "id": "record",
+      "op": "action.exec",
+      "action": "write-marker",
+      "input": {
+        "value": "survives-backward-step"
+      }
+    },
+    {
+      "id": "past",
+      "op": "clock.set",
+      "at": "1995-06-01T12:00:00Z"
+    },
+    {
+      "id": "observe",
+      "op": "action.exec",
+      "action": "observe"
+    },
+    {
+      "id": "read",
+      "op": "action.exec",
+      "action": "read-marker"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "past-year",
+      "step": "observe",
+      "pointer": "/stdout_json/year_utc",
+      "op": "eq",
+      "value": 1995
+    },
+    {
+      "id": "state-preserved",
+      "step": "read",
+      "pointer": "/stdout_json/value",
+      "op": "eq",
+      "value": "survives-backward-step"
+    }
+  ]
+}

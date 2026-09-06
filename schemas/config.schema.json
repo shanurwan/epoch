@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://epoch.invalid/schemas/config.schema.json",
+  "title": "Epoch operator configuration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "firecracker_path",
+    "artifact_manifest_dir",
+    "evidence_dir",
+    "runtime_root"
+  ],
+  "properties": {
+    "api_version": {
+      "const": "epoch-config/v1",
+      "default": "epoch-config/v1"
+    },
+    "firecracker_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_manifest_dir": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_dir": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "guest_cid": {
+      "const": 3,
+      "default": 3
+    },
+    "guest_port": {
+      "const": 7000,
+      "default": 7000
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "max_vcpus": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "default": 2
+        },
+        "max_memory_mib": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 2048,
+          "default": 2048
+        },
+        "max_disk_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967296,
+          "default": 4294967296
+        },
+        "reserve_bytes": {
+          "type": "integer",
+          "minimum": 5368709120,
+          "maximum": 9223372036854775807,
+          "default": 5368709120
+        },
+        "max_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600000,
+          "default": 600000
+        },
+        "host_clock_threshold_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000,
+          "default": 250
+        }
+      }
+    }
+  },
+  "description": "Paths are resolved relative to this configuration; ~/ expands the operator home. Runtime and evidence roots must be separate and non-nested. Runtime path must fit Linux Unix-socket limits. Epoch enforces these semantic checks and rejects explicit nulls."
+}

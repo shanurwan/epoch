@@ -1,0 +1,60 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "live-service-clock-step",
+  "image": "epoch-clock-probe-v1",
+  "workload": "clock-probe",
+  "steps": [
+    {
+      "id": "initial",
+      "op": "clock.set",
+      "at": "2000-01-01T12:00:00Z"
+    },
+    {
+      "id": "start",
+      "op": "service.start",
+      "service": "probe",
+      "timeout_ms": 5000
+    },
+    {
+      "id": "live-step",
+      "op": "clock.set",
+      "at": "2030-01-01T12:00:00Z",
+      "allow_live": true
+    },
+    {
+      "id": "read",
+      "op": "action.exec",
+      "action": "observe",
+      "timeout_ms": 5000
+    },
+    {
+      "id": "stop",
+      "op": "service.stop",
+      "service": "probe",
+      "timeout_ms": 5000
+    }
+  ],
+  "assertions": [
+    {
+      "id": "service-started",
+      "step": "start",
+      "pointer": "/running",
+      "op": "eq",
+      "value": true
+    },
+    {
+      "id": "future-year",
+      "step": "read",
+      "pointer": "/stdout_json/year_utc",
+      "op": "eq",
+      "value": 2030
+    },
+    {
+      "id": "service-stopped",
+      "step": "stop",
+      "pointer": "/running",
+      "op": "eq",
+      "value": false
+    }
+  ]
+}
