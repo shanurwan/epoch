@@ -5,7 +5,10 @@ umask 077
 
 usage() {
   cat <<'USAGE'
-Usage: build-guest-image.sh --apply PREPARED_USERSPACE KERNEL AGENT CLOCK_PROBE OUTPUT_DIR SOURCE_IDENTITY [SIZE_MIB]
+Usage: build-guest-image.sh --apply PREPARED_USERSPACE KERNEL AGENT WORKLOAD_BINARY WORKLOAD_MANIFEST IMAGE_ID OUTPUT_DIR SOURCE_IDENTITY [SIZE_MIB]
+
+Legacy clock-probe form remains accepted:
+  build-guest-image.sh --apply PREPARED_USERSPACE KERNEL AGENT CLOCK_PROBE OUTPUT_DIR SOURCE_IDENTITY [SIZE_MIB]
 
 Requires Linux, explicit administrator execution, mke2fs, e2fsck, jq, readelf,
 coreutils and a complete local x86_64 systemd userspace. A local squashfs input
@@ -18,21 +21,37 @@ Staging is retained in OUTPUT_DIR for inspection, including after a failed build
 USAGE
 }
 fail() { printf '%s\n' "error: $*" >&2; exit 1; }
-[[ $# -ge 7 && $# -le 8 && $1 == --apply ]] || { usage; exit 2; }
+[[ ${1:-} == --apply ]] || { usage; exit 2; }
+if [[ $# -ge 9 && $# -le 10 ]]; then
+  manifest_argument=$6
+  image_id=$7
+  output=$8
+  source_identity=$9
+  size_mib=${10:-2048}
+elif [[ $# -ge 7 && $# -le 8 ]]; then
+  manifest_argument=$(dirname -- "${BASH_SOURCE[0]}")/../workloads/clock-probe/workload.json
+  image_id=epoch-clock-probe-v1
+  output=$6
+  source_identity=$7
+  size_mib=${8:-2048}
+else
+  usage
+  exit 2
+fi
 [[ $(uname -s) == Linux && $(uname -m) == x86_64 ]] || fail 'Linux x86_64 is required'
 [[ $EUID -eq 0 ]] || fail 'explicit administrator execution is required; the script does not invoke sudo'
 for command in realpath stat install cp mkdir mktemp truncate mke2fs e2fsck jq sha256sum readelf find; do
   command -v "$command" >/dev/null || fail "missing preparation tool: $command"
 done
+recipe_dir=$(realpath -e -- "$(dirname -- "${BASH_SOURCE[0]}")/../build/guest")
 
 [[ ! -L $2 ]] || fail 'userspace input must not be a symlink'
 userspace=$(realpath -e -- "$2")
 kernel=$(realpath -e -- "$3")
 agent=$(realpath -e -- "$4")
-probe=$(realpath -e -- "$5")
-output=$6
-source_identity=$7
-size_mib=${8:-2048}
+workload=$(realpath -e -- "$5")
+[[ ! -L $manifest_argument ]] || fail 'workload manifest must not be a symlink'
+manifest_source=$(realpath -e -- "$manifest_argument")
 [[ $size_mib =~ ^[0-9]+$ && ${#size_mib} -le 4 ]] || fail 'invalid image size'
 (( size_mib >= 256 && size_mib <= 4096 )) || fail 'image size must be 256..4096 MiB'
 [[ -n $source_identity && ${#source_identity} -le 1024 ]] || fail 'source identity must contain 1..1024 characters'
@@ -52,10 +71,15 @@ elif [[ $userspace != / && -d $userspace && -f $userspace/.epoch-prepared-usersp
 else
   fail 'userspace must be a regular squashfs file or a marked prepared directory'
 fi
-for file in "$kernel" "$agent" "$probe"; do
+for file in "$kernel" "$agent" "$workload"; do
   [[ -f $file && ! -L $file ]] || fail "not a regular input file: $file"
   readelf -h "$file" | grep -q 'Advanced Micro Devices X86-64' || fail "input is not an x86_64 ELF file: $file"
 done
+[[ -f $manifest_source && ! -L $manifest_source ]] || fail 'workload manifest must be a regular file'
+workload_id=$(jq -er '.id | select(type == "string" and test("^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"))' "$manifest_source") || fail 'invalid workload ID'
+workload_version=$(jq -er '.version | select(type == "string" and length > 0)' "$manifest_source") || fail 'invalid workload version'
+jq -e --arg executable "/usr/local/libexec/$workload_id" -f "$recipe_dir/workload-image-contract.jq" "$manifest_source" >/dev/null || fail 'workload manifest identity, account, working directory or executable does not match the image recipe'
+[[ $image_id =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$ ]] || fail 'invalid image ID'
 [[ $output == /* && ! -e $output && ! -L $output ]] || fail 'output must be a new absolute path'
 parent=$(realpath -e -- "$(dirname -- "$output")")
 [[ $output == "$parent/$(basename -- "$output")" ]] || fail 'output path must be canonical without symlink ancestors or traversal'
@@ -74,8 +98,6 @@ validate_userspace_tree() {
   done
 }
 if [[ $userspace_kind == prepared-directory ]]; then validate_userspace_tree "$userspace"; fi
-recipe_dir=$(realpath -e -- "$(dirname -- "${BASH_SOURCE[0]}")/../build/guest")
-manifest_source=$(realpath -e -- "$recipe_dir/../../workloads/clock-probe/workload.json")
 
 mkdir -m 0700 -- "$output"
 trap 'printf "Preparation stopped; inspect retained staging at %s\n" "$output" >&2' ERR
@@ -84,14 +106,14 @@ tree=$stage/root
 [[ ! -e $tree && ! -L $tree && $(realpath -e -- "$stage") == "$stage" ]] || fail 'new extraction destination identity check failed'
 kernel_input_hash=$(sha256sum -- "$kernel"); kernel_input_hash=${kernel_input_hash%% *}
 agent_input_hash=$(sha256sum -- "$agent"); agent_input_hash=${agent_input_hash%% *}
-probe_input_hash=$(sha256sum -- "$probe"); probe_input_hash=${probe_input_hash%% *}
-jq -n -f "$recipe_dir/preparation-inputs.jq" \
-  --arg source "$source_identity" --arg kind "$userspace_kind" \
+workload_input_hash=$(sha256sum -- "$workload"); workload_input_hash=${workload_input_hash%% *}
+jq --arg source "$source_identity" --arg kind "$userspace_kind" \
   --arg path "$userspace" --arg hash "$userspace_hash" \
   --arg marker "$userspace_marker_hash" --argjson size "$userspace_size" \
   --arg kp "$kernel" --arg kh "$kernel_input_hash" --argjson ks "$(stat -c %s -- "$kernel")" \
   --arg ap "$agent" --arg ah "$agent_input_hash" --argjson agent_size "$(stat -c %s -- "$agent")" \
-  --arg pp "$probe" --arg ph "$probe_input_hash" --argjson ps "$(stat -c %s -- "$probe")" \
+  --arg wp "$workload" --arg wh "$workload_input_hash" --argjson ws "$(stat -c %s -- "$workload")" \
+  -n -f "$recipe_dir/preparation-inputs.jq" \
   > "$output/preparation-inputs.json"
 if [[ $userspace_kind == squashfs ]]; then
   unsquashfs -strict-errors -no-progress -processors 1 -data-queue 16 -frag-queue 16 -no-xattrs -dest "$tree" "$userspace"
@@ -148,12 +170,12 @@ for kind in system-generators system-environment-generators; do
     done < <(find "$tree/$location/$kind" -mindepth 1 -maxdepth 1 -print0)
   done
 done
-for file in etc/passwd etc/group etc/shadow etc/gshadow etc/fstab etc/systemd/system/epoch.target etc/systemd/system/epoch-agent.service etc/epoch/workload.json usr/local/libexec/epoch-agent usr/local/libexec/clock-probe; do
+for file in etc/passwd etc/group etc/shadow etc/gshadow etc/fstab etc/systemd/system/epoch.target etc/systemd/system/epoch-agent.service etc/epoch/workload.json usr/local/libexec/epoch-agent "usr/local/libexec/$workload_id"; do
   safe_target "$file"
 done
 [[ -f $tree/usr/lib/systemd/systemd ]] || fail 'prepared userspace requires systemd at /usr/lib/systemd/systemd'
 install -m 0755 -- "$agent" "$tree/usr/local/libexec/epoch-agent"
-install -m 0755 -- "$probe" "$tree/usr/local/libexec/clock-probe"
+install -m 0755 -- "$workload" "$tree/usr/local/libexec/$workload_id"
 install -m 0644 -- "$manifest_source" "$tree/etc/epoch/workload.json"
 install -m 0644 -- "$recipe_dir/epoch.target" "$tree/etc/systemd/system/epoch.target"
 install -m 0644 -- "$recipe_dir/epoch-agent.service" "$tree/etc/systemd/system/epoch-agent.service"
@@ -188,10 +210,10 @@ mv -T -- "$image" "$output/rootfs.ext4"
 kernel_hash=$(sha256sum -- "$output/kernel.elf"); kernel_hash=${kernel_hash%% *}
 root_hash=$(sha256sum -- "$output/rootfs.ext4"); root_hash=${root_hash%% *}
 agent_hash=$(sha256sum -- "$tree/usr/local/libexec/epoch-agent"); agent_hash=${agent_hash%% *}
-probe_hash=$(sha256sum -- "$tree/usr/local/libexec/clock-probe"); probe_hash=${probe_hash%% *}
+installed_workload_hash=$(sha256sum -- "$tree/usr/local/libexec/$workload_id"); installed_workload_hash=${installed_workload_hash%% *}
 workload_hash=$(sha256sum -- "$output/workload.json"); workload_hash=${workload_hash%% *}
 embedded_workload_hash=$(sha256sum -- "$tree/etc/epoch/workload.json"); embedded_workload_hash=${embedded_workload_hash%% *}
-[[ $kernel_hash == "$kernel_input_hash" && $agent_hash == "$agent_input_hash" && $probe_hash == "$probe_input_hash" ]] || fail 'copied kernel or binaries differ from their recorded input hashes'
+[[ $kernel_hash == "$kernel_input_hash" && $agent_hash == "$agent_input_hash" && $installed_workload_hash == "$workload_input_hash" ]] || fail 'copied kernel or binaries differ from their recorded input hashes'
 [[ $workload_hash == "$embedded_workload_hash" ]] || fail 'external workload manifest differs from the installed guest manifest'
 if [[ $userspace_kind == squashfs ]]; then
   observed=$(sha256sum -- "$userspace"); observed=${observed%% *}
@@ -201,14 +223,16 @@ else
   userspace_transformation='Copied marked operator-prepared directory into retained staging; no whole-directory input digest claimed'
 fi
 preparation_hash=$(sha256sum -- "$output/preparation-inputs.json"); preparation_hash=${preparation_hash%% *}
-jq -n -f "$recipe_dir/image-manifest.jq" --arg source "$source_identity" \
+jq --arg source "$source_identity" \
+  --arg image_id "$image_id" --arg workload_id "$workload_id" --arg workload_version "$workload_version" \
   --arg kh "$kernel_hash" --arg rh "$root_hash" --arg ah "$agent_hash" \
   --arg wh "$workload_hash" --arg prep "$preparation_hash" \
   --arg transformation "$userspace_transformation" \
   --argjson ks "$(stat -c %s -- "$output/kernel.elf")" \
   --argjson rs "$(stat -c %s -- "$output/rootfs.ext4")" \
-  > "$output/epoch-clock-probe-v1.json"
-chmod 0600 -- "$output/rootfs.ext4" "$output/epoch-clock-probe-v1.json" "$output/preparation-inputs.json"
-chown "$owner:$group" -- "$output" "$output/kernel.elf" "$output/rootfs.ext4" "$output/workload.json" "$output/epoch-clock-probe-v1.json" "$output/preparation-inputs.json"
+  -n -f "$recipe_dir/image-manifest.jq" \
+  > "$output/$image_id.json"
+chmod 0600 -- "$output/rootfs.ext4" "$output/$image_id.json" "$output/preparation-inputs.json"
+chown "$owner:$group" -- "$output" "$output/kernel.elf" "$output/rootfs.ext4" "$output/workload.json" "$output/$image_id.json" "$output/preparation-inputs.json"
 trap - ERR
 printf 'Prepared files at %s; guest boot/vsock/clock compatibility is NOT yet verified.\n' "$output"

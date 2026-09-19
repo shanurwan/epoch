@@ -1,9 +1,11 @@
 # Architecture and decisions
 
-The host binary is an ordinary-user foreground controller. The guest agent is a
-separate Linux binary supervised by real systemd init. Only guestclock contains
-the real CLOCK_REALTIME setter; an architecture test checks the Linux host
-dependency graph does not include that package.
+Epoch is general-purpose temporal systems-testing infrastructure. The host binary
+is an ordinary-user foreground controller. The guest control agent is a separate
+Linux binary supervised by real systemd init; “guest agent” here is transport and
+process-control terminology, not an autonomous-agent domain model. Only guestclock
+contains the real CLOCK_REALTIME setter, and an architecture test checks that the
+Linux host dependency graph does not include that package.
 
 ```mermaid
 flowchart TD
@@ -19,6 +21,21 @@ flowchart TD
   Agent --> Clock[Guarded guest clock setter]
   Agent --> Workload[Declared non-root processes and local state]
 ```
+
+The stable core boundary is:
+
+```text
+scenario declaration -> validation -> Firecracker lifecycle -> guest time control
+  -> workload execution -> observations -> typed assertions -> evidence
+  -> cleanup / recovery
+```
+
+Reference workloads sit above that boundary. `clock-probe` is the system-test
+fixture. `agent-authority-expiry` is one incident-response expiry/TOCTOU example.
+Its agent IDs, capabilities, resources, authority interval, authorization outcomes,
+and simulated worker state do not appear in `cmd/` or `internal/`. Future batch,
+subscription, or certificate workloads use the same generic action/observation
+path rather than extending core with their business types.
 
 ## Review increments
 
@@ -47,6 +64,9 @@ The runtime never attaches a NIC or mounts host directories. Loopback inside the
 guest is available to application components. A full private byte copy was chosen
 for straightforward ownership and failure behavior; it is not a VM snapshot.
 No reflinks, restored memory or automatic action retry are implemented.
+Consequently, current temporal branches are independent cold boots from equivalent
+declared image inputs, not branches from identical memory/device state. See
+`temporal-forking.md` for precise terminology and the snapshot-backed roadmap.
 
 The agent's hello `ready` means control-channel readiness. A separate internal
 barrier permits workload execution only after measured clock readback passes.

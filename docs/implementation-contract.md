@@ -1,17 +1,20 @@
 # Epoch implementation contract
 
-Status: proposed implementation contract for the first experimentally validated,
-single-host release. See `implementation-status.md` for actual evidence. The
-product label is **experimental single-operator temporal test runner**.
+Status: implementation contract for the pre-hardware-validation single-host
+phase. See `implementation-status.md` for actual evidence. The project identity is
+**Temporal Forking Infrastructure for Deterministic Batch & Expiry Testing**;
+“deterministic” remains a target thesis, not a proven execution claim.
 
 ## Product and boundary
 
 Epoch is an application-independent Go CLI and execution engine for isolated
 temporal regression tests of stateful Linux applications in Firecracker/KVM.
-The module is `github.com/shanurwan/epoch`; C is deferred. Subscription/batch/expiry
-and non-AI knowledge management/search are later, separate reference workloads.
-They do not belong in the core. Examples are not validated customers or compliance
-claims. No career goals belong in project documentation.
+The module is `github.com/shanurwan/epoch`; C is deferred. Batch, subscription,
+certificate, credential, lease and other expiry semantics belong in separate
+reference workloads, never the core. The included autonomous-agent authority
+expiry workload is one such example, not an AI testing framework or product
+integration. Examples are not validated customers or compliance claims. No
+career goals belong in project documentation.
 
 From a validated local scenario and prepared images, the ordinary-user foreground
 controller cold-boots one microVM, establishes actual guest wall time, runs declared
@@ -22,9 +25,11 @@ Guest loopback is permitted. Each run receives a fresh full private disk copy.
 
 The target is Linux x86_64 on bare-metal Rocky Linux, one operator/VM at a time,
 trusted local images and synthetic workloads. Deferred: daemon/HTTP API,
-Kubernetes, scheduling, snapshots/restore, frozen/accelerated monotonic time,
+Kubernetes, orchestration scheduling, snapshots/restore, frozen/accelerated
+monotonic time,
 instruction replay, external databases, timezone/DST and leap seconds, billing,
-LLMs, secrets, arbitrary hostile code, delegated cgroup enforcement. Guest machine
+LLMs, external authorization/secrets systems, arbitrary hostile code, and
+delegated cgroup enforcement. Guest machine
 configuration is not a hard host RSS/CPU quota. Direct non-jailer launch is a lab
 limitation, not hardened tenant isolation or enterprise/production readiness.
 
@@ -144,7 +149,8 @@ Do not claim bit-for-bit reproducibility without testing it.
 Acquisition is explicit preparation, never run-time latest lookup or guessed image
 names. The empty v1.16 CI prefix does not authorize silent version substitution.
 Accept operator-supplied, recorded compatible artifacts. The optional offline image
-helper stages an explicitly supplied userspace, installs the agent, fixture,
+helper stages an explicitly supplied userspace, installs the guest agent and
+declared workload,
 unprivileged account and controlled init target into a new regular image file and
 validates it. It must never format physical devices or edit host /boot/services.
 No binaries, archives, images or machine evidence in Git.

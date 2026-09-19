@@ -1,0 +1,68 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "agent-authority-after-expiry",
+  "image": "epoch-agent-authority-expiry-v1",
+  "workload": "agent-authority-expiry",
+  "resources": {
+    "vcpu_count": 1,
+    "memory_mib": 512
+  },
+  "timeout_ms": 120000,
+  "boot_timeout_ms": 30000,
+  "steps": [
+    {
+      "id": "after-expiry",
+      "op": "clock.set",
+      "at": "2035-01-01T12:00:31Z",
+      "tolerance_ms": 100
+    },
+    {
+      "id": "restart",
+      "op": "action.exec",
+      "action": "attempt",
+      "input": {
+        "request_id": "restart-after-expiry",
+        "agent_id": "incident-agent-01",
+        "operation": "worker.restart",
+        "resource": "worker-17",
+        "authority": {
+          "principal": "agent://incident-agent-01",
+          "capability": "worker.restart",
+          "resource": "worker-17",
+          "not_before": "2035-01-01T12:00:00Z",
+          "expires_at": "2035-01-01T12:00:30Z"
+        }
+      },
+      "timeout_ms": 5000
+    }
+  ],
+  "assertions": [
+    {
+      "id": "expired",
+      "step": "restart",
+      "pointer": "/stdout_json/initial_authorization",
+      "op": "eq",
+      "value": "DENY_EXPIRED"
+    },
+    {
+      "id": "request-rejected",
+      "step": "restart",
+      "pointer": "/stdout_json/request_accepted",
+      "op": "eq",
+      "value": false
+    },
+    {
+      "id": "no-side-effect",
+      "step": "restart",
+      "pointer": "/stdout_json/side_effect_performed",
+      "op": "eq",
+      "value": false
+    },
+    {
+      "id": "no-worker-state",
+      "step": "restart",
+      "pointer": "/stdout_json/worker_state",
+      "op": "absent"
+    }
+  ]
+}

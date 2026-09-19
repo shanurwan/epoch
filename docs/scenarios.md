@@ -1,8 +1,8 @@
 # Scenarios and assertions
 
-Epoch is an experimental single-operator temporal test runner. The portable JSON
-scenario selects a locally prepared image and named workload operations. Machine
-paths belong in operator configuration. Validation never boots a VM.
+Epoch is general-purpose temporal systems-testing infrastructure. The portable
+JSON scenario selects a locally prepared image and named workload operations.
+Machine paths belong in operator configuration. Validation never boots a VM.
 
 Run `epoch validate scenarios/clock-smoke.json --config epoch.local.json` before
 an explicitly approved disposable-VM experiment. See
@@ -100,6 +100,15 @@ persistent marker. `clock-backward.json` checks a backward change while preservi
 the marker. `live-service.json` explicitly changes time with a service running.
 `real-sleep.json` exercises a fixed real-time sleep.
 `expected-nonzero.json` expects the fixture's normal exit code 7.
+
+The `agent-authority-before-expiry` and `agent-authority-after-expiry` reference
+scenarios apply the same declared incident-agent authority and simulated
+`worker.restart` operation at 12:00:29Z and 12:00:31Z. The
+`agent-authority-toctou` scenario accepts the request at 12:00:25Z, moves guest
+time past the 12:00:30Z expiry, revalidates at 12:00:35Z, and asserts that no
+workload-local restart side effect occurred. These scenarios use the separate
+`agent-authority-expiry` workload; no domain fields were added to the scenario
+schema or engine. See `reference-agent-authority-expiry.md`.
 
 The `fault-timeout`, `fault-large-output`, `fault-large-stderr` and
 `fault-malformed-json` scenarios are platform negative controls. Their intended

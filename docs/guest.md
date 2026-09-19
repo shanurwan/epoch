@@ -4,6 +4,8 @@ The guest agent and its clock setter are guest-only code. Unit tests inject a
 fake clock boundary; no test invokes the real setter on the development host.
 The standalone clock-probe reads Linux CLOCK_REALTIME and CLOCK_MONOTONIC directly.
 It has no requested-clock environment override and does not import the engine.
+The authority-expiry reference workload reads the process wall clock for each
+application decision and has no injected runtime time override.
 
 ## Boot and privilege boundary
 
@@ -77,13 +79,14 @@ Readiness probes alone may be repeated within their deadline; declared business
 actions are never replayed. Service diagnostics are returned on explicit stop.
 Workloads must not daemonize or intentionally escape their owned process group.
 
-## Preparing the first fixture image
+## Preparing a workload image
 
 First build local binaries with the pinned toolchain, without running the agent:
 
 ```sh
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/epoch-agent ./cmd/epoch-agent
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/clock-probe ./workloads/clock-probe
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/agent-authority-expiry ./workloads/agent-authority-expiry
 ```
 
 Before administration, inspect the userspace, kernel source identity,
@@ -106,9 +109,18 @@ bash scripts/build-guest-image.sh --apply \
   /absolute/guest-inputs/ubuntu-24.04.squashfs \
   /absolute/guest-inputs/vmlinux-6.1.155 \
   /absolute/bin/epoch-agent /absolute/bin/clock-probe \
+  /absolute/epoch/workloads/clock-probe/workload.json \
+  epoch-clock-probe-v1 \
   /home/OPERATOR/epoch-lab/images/clock-probe-v1 \
   'firecracker-ci/v1.15/x86_64; candidate identities in artifacts/guest-inputs.candidate.lock.json' 2048
 ```
+
+To prepare the authority-expiry reference instead, supply
+`bin/agent-authority-expiry`, its adjacent `workload.json`, image ID
+`epoch-agent-authority-expiry-v1`, and a different new output directory. The
+legacy clock-probe-only positional form remains accepted for existing operator
+procedures. The generic form validates that every declared command uses the one
+workload binary installed at `/usr/local/libexec/WORKLOAD_ID`.
 
 This candidate uses the explicit Ubuntu 24.04 squashfs and Linux 6.1.155 kernel
 objects observed in the upstream v1.15 image listing. Firecracker itself remains
@@ -133,7 +145,7 @@ prove a kernel is bootable or compatible. Only default agent build version
 matching metadata updates before use.
 
 Output includes kernel.elf, rootfs.ext4, workload.json, preparation-inputs.json
-and epoch-clock-probe-v1.json. Point artifact_manifest_dir at that output directory.
+and `IMAGE_ID.json`. Point artifact_manifest_dir at that output directory.
 Preparation metadata records the local squashfs/kernel/binary hashes and sizes
 before extraction. It verifies the copied kernel, installed binaries, and embedded
 workload manifest against those identities. The image recipe records its

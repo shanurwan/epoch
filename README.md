@@ -1,16 +1,53 @@
 # Epoch
 
-Experimental single-operator temporal test runner for stateful Linux applications.
-Epoch cold-boots a Firecracker microVM from a private disk copy, changes the
-guest's actual wall clock, runs declared unprivileged workload actions, evaluates
-JSON observations, and retains evidence with independent execution, assertion and
-cleanup outcomes. The host clock and its normal synchronization remain unchanged.
+**Temporal Forking Infrastructure for Deterministic Batch & Expiry Testing**
+
+Epoch is general-purpose infrastructure for testing software whose behavior changes
+with wall-clock time: scheduled batches, settlement windows, billing cycles,
+subscriptions, credentials, certificates, sessions, retention windows, TTLs,
+retries, leases, maintenance windows, delayed execution, and delegated authority.
+It creates controlled temporal executions without changing the host clock or its
+normal time synchronization.
+
+The current implementation cold-boots one Firecracker microVM from a fresh private
+disk copy, sets the guest's actual wall clock, runs explicitly declared unprivileged
+workload actions, evaluates typed JSON observations, and retains evidence with
+independent execution, assertion, and cleanup outcomes. These are independent
+temporal executions from equivalent declared image inputs. They are not
+Firecracker memory-snapshot forks and do not begin from identical RAM/device state.
+
+The project thesis uses “deterministic” as the target for controlled batch and
+expiry testing. Deterministic execution has not yet been established by hardware
+evidence. See [Temporal forking](docs/temporal-forking.md) for the precise current
+capability and roadmap.
 
 **Validation boundary:** the target host is bare-metal Rocky Linux x86_64. The Go
 engine and guest agent are implemented; see the status matrix for test evidence.
 A successful real guest boot, vsock session and guest-clock experiment have not
 yet been verified. This is not a claim of
 production readiness, deterministic execution or hostile-tenant isolation.
+
+## Core and reference workloads
+
+Epoch core knows only scenario declarations, guest time control, declared workload
+actions, observations, assertions, evidence, and owned cleanup/recovery. Domain
+semantics live in replaceable guest workloads:
+
+```text
+Epoch core
+  +-- clock-probe                  system-test fixture
+  +-- agent-authority-expiry       one expiry/TOCTOU reference experiment
+  +-- future scheduled-batch
+  +-- future subscription-expiry
+  +-- future certificate-expiry
+```
+
+The flagship reference experiment asks what happens when an incident-response
+software agent is authorized to perform a simulated `worker.restart`, but the
+authority expires before the execution boundary. It is local, deterministic at
+the application-test level, requires no LLM, network, container platform, secrets
+service, or external authorization product, and never restarts a host service.
+See [Expiring autonomous-agent authority](docs/reference-agent-authority-expiry.md).
 
 ## Build and test
 
@@ -62,12 +99,13 @@ action. Read the [operator runbook](docs/operations.md) before hardware tests.
   [evidence/status matrix](docs/implementation-status.md).
 - [Architecture and decisions](docs/architecture.md), including ownership and
   readiness boundaries.
+- [Temporal-forking terminology and roadmap](docs/temporal-forking.md).
 - [Scenarios and exact typed assertions](docs/scenarios.md).
+- [Authority-expiry reference experiment](docs/reference-agent-authority-expiry.md).
 - [Guest protocol, privileges and image preparation](docs/guest.md).
 - [Host supervision and recovery limits](docs/host-runtime.md).
 - [Results, quotas and durability](docs/evidence.md).
 
-The only workload is the independent clock-probe system-test fixture. Subscription
-and non-AI knowledge-management examples are deferred. The shell bootstrap remains
-separate from the Go runtime; no administration, network setup, sudo or dependency
-fetching occurs in `epoch run`.
+The shell bootstrap and offline image preparation remain separate from the Go
+runtime; no administration, network setup, sudo, package installation, dependency
+fetching, or image download occurs in `epoch run`.

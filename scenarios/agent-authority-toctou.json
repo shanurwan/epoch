@@ -1,0 +1,124 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "agent-authority-toctou",
+  "image": "epoch-agent-authority-expiry-v1",
+  "workload": "agent-authority-expiry",
+  "resources": {
+    "vcpu_count": 1,
+    "memory_mib": 512
+  },
+  "timeout_ms": 120000,
+  "boot_timeout_ms": 30000,
+  "steps": [
+    {
+      "id": "request-time",
+      "op": "clock.set",
+      "at": "2035-01-01T12:00:25Z",
+      "tolerance_ms": 100
+    },
+    {
+      "id": "request",
+      "op": "action.exec",
+      "action": "request",
+      "input": {
+        "request_id": "restart-delayed",
+        "agent_id": "incident-agent-01",
+        "operation": "worker.restart",
+        "resource": "worker-17",
+        "authority": {
+          "principal": "agent://incident-agent-01",
+          "capability": "worker.restart",
+          "resource": "worker-17",
+          "not_before": "2035-01-01T12:00:00Z",
+          "expires_at": "2035-01-01T12:00:30Z"
+        }
+      },
+      "timeout_ms": 5000
+    },
+    {
+      "id": "execution-time",
+      "op": "clock.set",
+      "at": "2035-01-01T12:00:35Z",
+      "tolerance_ms": 100
+    },
+    {
+      "id": "execute",
+      "op": "action.exec",
+      "action": "execute-pending",
+      "timeout_ms": 5000
+    },
+    {
+      "id": "state",
+      "op": "action.exec",
+      "action": "worker-state",
+      "input": {
+        "resource": "worker-17"
+      },
+      "timeout_ms": 5000
+    }
+  ],
+  "assertions": [
+    {
+      "id": "request-authorized",
+      "step": "request",
+      "pointer": "/stdout_json/initial_authorization",
+      "op": "eq",
+      "value": "AUTHORIZED"
+    },
+    {
+      "id": "request-accepted",
+      "step": "request",
+      "pointer": "/stdout_json/request_accepted",
+      "op": "eq",
+      "value": true
+    },
+    {
+      "id": "request-did-not-execute",
+      "step": "request",
+      "pointer": "/stdout_json/side_effect_performed",
+      "op": "eq",
+      "value": false
+    },
+    {
+      "id": "initial-decision-preserved",
+      "step": "execute",
+      "pointer": "/stdout_json/initial_authorization",
+      "op": "eq",
+      "value": "AUTHORIZED"
+    },
+    {
+      "id": "execution-denied",
+      "step": "execute",
+      "pointer": "/stdout_json/execution_authorization",
+      "op": "eq",
+      "value": "DENY_EXPIRED"
+    },
+    {
+      "id": "accepted-request-retained",
+      "step": "execute",
+      "pointer": "/stdout_json/request_accepted",
+      "op": "eq",
+      "value": true
+    },
+    {
+      "id": "no-delayed-side-effect",
+      "step": "execute",
+      "pointer": "/stdout_json/side_effect_performed",
+      "op": "eq",
+      "value": false
+    },
+    {
+      "id": "worker-not-restarted",
+      "step": "state",
+      "pointer": "/stdout_json/restart_count",
+      "op": "eq",
+      "value": 0
+    },
+    {
+      "id": "no-restart-request-recorded",
+      "step": "state",
+      "pointer": "/stdout_json/last_request_id",
+      "op": "absent"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Implementation status
 
-Target: first experimentally validated single-host release on bare-metal Rocky
+Target: first hardware-validated single-host release on bare-metal Rocky
 Linux x86_64. The engine is implemented; the release acceptance gate is still
 pending a prepared disposable image and opt-in guest boot/clock experiments.
 Ordinary tests and a working doctor command do not establish that gate.
@@ -16,9 +16,10 @@ Ordinary tests and a working doctor command do not establish that gate.
 | Vsock handshake and wire identity | Yes | Real Unix-socket protocol tests pass, including actual hello readiness contract | AF_VSOCK guest session pending |
 | Guest clock guards and readback | Yes | Fake syscall boundary only; no actual setter used | Pending |
 | Guest actions/services and fault fixtures | Yes | Real subprocess tests pass, including descendants, races, deadlines, nonzero exits and output quotas | Guest privilege/init checks pending |
+| Agent-authority-expiry reference workload | Yes | Target-host run pending; unit tests pass on the current authoring host and three scenarios validate | Real guest experiment pending |
 | Evidence, outcome precedence and recovery | Yes | Pass, including host-discontinuity simulation, quota drain, failed publication and interrupted recovery | Abrupt VM/controller experiment pending |
 | Offline guest-image helper and systemd recipe | Yes | Bash syntax and read-only candidate inspection pass | Privileged preparation and boot pending |
-| Explicit KVM test harness and nine scenarios | Yes | Scenario validation, Bash syntax and precise-report predicates pass | Not executed |
+| Explicit nine-scenario clock-probe KVM harness | Yes | Scenario validation, Bash syntax and precise-report predicates pass | Not executed |
 
 ## Recorded checks
 
@@ -38,9 +39,12 @@ On the reference Rocky host as ordinary UID 1000 with Go 1.26.8:
   the overall run deadline.
 - Cancellation during guest shutdown and VMM cleanup is preserved in the final
   report; five regression cases pass, including incomplete-cleanup precedence.
-- The harness accepts nine synthetic expected reports and rejects 18 unrelated
+- The clock-probe harness accepts nine synthetic expected reports and rejects 18 unrelated
   failure variants, including VM crashes, lost responses and missing clock data.
   These checks do not boot a guest or establish hardware acceptance.
+- Three authority-expiry scenario declarations pass strict parser/semantic tests.
+  Their workload logic is unit-tested without an LLM, network, container runtime,
+  external authorization service or host side effect. They have not run in a guest.
 
 The Linux source dependency scan with govulncheck v1.7.0 found no known
 vulnerabilities across the application, pinned modules and Go 1.26.8 standard

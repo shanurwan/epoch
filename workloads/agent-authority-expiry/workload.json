@@ -1,0 +1,16 @@
+{
+  "api_version": "epoch-workload/v1",
+  "id": "agent-authority-expiry",
+  "version": "1",
+  "uid": 10001,
+  "gid": 10001,
+  "working_dir": "/var/lib/epoch-workload",
+  "environment": {},
+  "actions": {
+    "attempt": {"argv": ["/usr/local/libexec/agent-authority-expiry", "attempt"]},
+    "request": {"argv": ["/usr/local/libexec/agent-authority-expiry", "request"]},
+    "execute-pending": {"argv": ["/usr/local/libexec/agent-authority-expiry", "execute-pending"]},
+    "worker-state": {"argv": ["/usr/local/libexec/agent-authority-expiry", "worker-state"]}
+  },
+  "services": {}
+}

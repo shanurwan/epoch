@@ -8,4 +8,5 @@ export CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 go build -mod=readonly -trimpath -o bin/epoch ./cmd/epoch
 go build -mod=readonly -trimpath -o bin/epoch-agent ./cmd/epoch-agent
 go build -mod=readonly -trimpath -o bin/clock-probe ./workloads/clock-probe
+go build -mod=readonly -trimpath -o bin/agent-authority-expiry ./workloads/agent-authority-expiry
 printf 'Built Linux amd64 binaries in bin/. No binary was executed.\n'

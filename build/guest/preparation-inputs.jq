@@ -11,7 +11,7 @@
   },
   kernel: {path: $kp, sha256: $kh, size_bytes: $ks},
   guest_agent: {path: $ap, sha256: $ah, size_bytes: $agent_size},
-  clock_probe: {path: $pp, sha256: $ph, size_bytes: $ps},
+  workload_binary: {path: $wp, sha256: $wh, size_bytes: $ws},
   limitations: [
     "Observed hashes identify local content, not published checksums or signatures",
     "A prepared-directory marker digest is not a digest of directory contents",

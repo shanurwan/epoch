@@ -5,8 +5,12 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/shanurwan/epoch/internal/jsonutil"
 )
 
 func TestBoundedFrames(t *testing.T) {
@@ -42,5 +46,27 @@ func TestManifestRejectsPrivilegeAndShells(t *testing.T) {
 	m.Actions["observe"] = Command{Argv: []string{"/bin/sh", "-c", "echo x"}}
 	if err := m.Validate(); err == nil {
 		t.Fatal("shell accepted")
+	}
+}
+
+func TestCommittedWorkloadManifestsValidate(t *testing.T) {
+	files, err := filepath.Glob("../../workloads/*/workload.json")
+	if err != nil || len(files) == 0 {
+		t.Fatalf("find workload manifests: %v", err)
+	}
+	for _, file := range files {
+		t.Run(filepath.Base(filepath.Dir(file)), func(t *testing.T) {
+			data, err := os.ReadFile(file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var manifest WorkloadManifest
+			if err = jsonutil.Decode(data, &manifest); err != nil {
+				t.Fatal(err)
+			}
+			if err = manifest.Validate(); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }

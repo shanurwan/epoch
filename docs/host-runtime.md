@@ -1,6 +1,6 @@
 # Host runtime boundary
 
-Epoch is an experimental single-operator temporal test runner. The Linux x86_64
+Epoch is a single-operator temporal systems-testing runner. The Linux x86_64
 runtime runs as the ordinary operator. It neither invokes a host shell for
 scenario steps nor changes host clocks, timezone, synchronisation, networking,
 SELinux policy, or cgroup delegation. Existing host administration remains in

@@ -23,8 +23,10 @@ creation; `doctor --probe` is the explicit empty-VM operation.
 The image manifest file is IMAGE_ID.json in artifact_manifest_dir. Kernel/rootfs
 paths and workload manifest paths resolve relative to that file. The engine
 validates hashes, sizes, architecture, pinned VMM version, agent identity, workload
-declarations and recipe metadata before launching. The example image recipe emits
-epoch-clock-probe-v1.json. No prepared image is shipped or silently downloaded.
+declarations and recipe metadata before launching. The image recipe emits the
+explicitly selected `IMAGE_ID.json`; documented examples are
+`epoch-clock-probe-v1` and `epoch-agent-authority-expiry-v1`. Each prepared image
+contains one declared workload. No prepared image is shipped or silently downloaded.
 
 ## Hardware opt-in
 

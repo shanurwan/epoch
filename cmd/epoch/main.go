@@ -38,7 +38,7 @@ func command(ctx context.Context, args []string, out, diag io.Writer) int {
 		if len(args) != 1 {
 			return 2
 		}
-		fmt.Fprintf(out, "epoch %s (%s; %s/%s)\nexperimental single-operator temporal test runner\n", version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+		fmt.Fprintf(out, "epoch %s (%s; %s/%s)\nTemporal Forking Infrastructure for Deterministic Batch & Expiry Testing\n", version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		return 0
 	}
 	if args[0] == "--help" || args[0] == "help" {
