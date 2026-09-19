@@ -42,9 +42,14 @@ with dropped credentials and no supplementary groups. A read-only `/dev/vsock`
 descriptor lets this helper recheck CID without changing guest device permissions;
 the descriptor is closed before workload exec. The helper verifies empty active
 capability sets and sets PR_SET_NO_NEW_PRIVS on its locked exec thread. The agent
-unit also sets NoNewPrivileges. Workloads cannot gain clock-setting capability
-through a setuid executable or file capabilities. This is a trusted workload lab
-profile, not a general sandbox for hostile code.
+unit also sets NoNewPrivileges. Its bounding set contains only the capabilities
+needed for guest clock control, credential drop and owned-process cleanup. It makes
+only `CAP_SETUID` ambient so the root agent can enter UID 10001 on systemd versions
+that do not otherwise retain it as effective; the kernel clears that capability
+when the child changes UID, before the helper verifies that its permitted,
+effective and ambient sets are empty. Workloads cannot gain clock-setting
+capability through a setuid executable or file capabilities. This is a trusted
+workload lab profile, not a general sandbox for hostile code.
 
 ## Wire protocol
 

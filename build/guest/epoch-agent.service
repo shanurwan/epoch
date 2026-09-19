@@ -15,6 +15,11 @@ KillMode=control-group
 TimeoutStopSec=10s
 NoNewPrivileges=yes
 CapabilityBoundingSet=CAP_SYS_TIME CAP_SETUID CAP_SETGID CAP_KILL
+# systemd's exec transition did not retain CAP_SETUID in the effective set on
+# the verified Rocky/Firecracker path. The agent needs it only to enter the
+# declared workload UID; setuid then clears it before the helper's zero-active-
+# capability check and PR_SET_NO_NEW_PRIVS-protected workload exec.
+AmbientCapabilities=CAP_SETUID
 RestrictAddressFamilies=AF_UNIX AF_VSOCK AF_INET AF_INET6
 LimitCORE=0
 StandardInput=null
