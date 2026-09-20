@@ -1,0 +1,24 @@
+{
+  "api_version": "epoch-performance/v1",
+  "source_sha": "5f0f89f03f0660e511dee13e49a28b105aea7684",
+  "sample_scope": "60 successful authority reference runs",
+  "percentile_method": "nearest-rank",
+  "metrics_ns": {
+    "private_disk_preparation": {"count":60,"min":2139650436,"p50":2149684982,"p95":2214690795,"max":2237296270},
+    "vmm_start_guest_boot_vsock_readiness": {"count":60,"min":705864718,"p50":714780972,"p95":715800232,"max":721467289},
+    "ready_to_running_transition": {"count":60,"min":780165,"p50":998439,"p95":1211964,"max":1527107},
+    "engine_clock_step": {"count":80,"min":171610,"p50":534452,"p95":738197,"max":865897},
+    "guest_reported_clock_apply_readback": {"count":80,"min":24090,"p50":42903,"p95":51088,"max":64779},
+    "engine_action_step": {"count":100,"min":1880970,"p50":3912511,"p95":5144878,"max":6008109},
+    "post_execution_status_transition": {"count":60,"min":741673,"p50":890749,"p95":1051541,"max":1128596},
+    "cleanup_to_finished": {"count":60,"min":79158509,"p50":87386398,"p95":98878709,"max":102618840},
+    "total_run": {"count":60,"min":2962010919,"p50":2979093159,"p95":3040660579,"max":3073915062}
+  },
+  "unavailable": [
+    "Firecracker process launch latency separate from guest boot and vsock readiness",
+    "Guest readiness latency separate from Firecracker launch",
+    "Assertion evaluation latency",
+    "Evidence persistence latency",
+    "Final report write latency"
+  ]
+}

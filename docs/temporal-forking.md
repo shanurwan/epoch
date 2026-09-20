@@ -26,13 +26,15 @@ no multi-branch orchestrator. “Snapshot fork” would therefore be inaccurate.
 Useful precise terms for the current implementation are **temporal execution**,
 **temporal branch**, **equivalent declared inputs**, and, when the operator reruns
 the same declaration, **temporal replay**. A replay is a new cold boot and private
-disk copy; deterministic replay has not yet been proven.
+disk copy. The documented authority scenarios each produced one normalized
+semantic result across 20 executions on the recorded host; this does not prove
+general deterministic replay.
 
 ## Roadmap
 
 | Phase | Meaning | Status |
 | --- | --- | --- |
-| 1 | Controlled independent temporal executions from equivalent declared image inputs | Implemented and unit-tested; guest hardware validation pending |
+| 1 | Controlled independent temporal executions from equivalent declared image inputs | Implemented; documented clock/expiry paths hardware-verified on one reference host |
 | 2 | Snapshot-backed temporal forks from a captured memory/device state | Future; not implemented |
 | 3 | Coordinated multi-branch experiments and branch comparison | Future; not implemented |
 

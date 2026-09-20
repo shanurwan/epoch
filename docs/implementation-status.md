@@ -1,76 +1,114 @@
 # Implementation status
 
-Target: first hardware-validated single-host release on bare-metal Rocky
-Linux x86_64. The engine is implemented; the release acceptance gate is still
-pending a prepared disposable image and opt-in guest boot/clock experiments.
-Ordinary tests and a working doctor command do not establish that gate.
+Epoch's first documented single-host hardware acceptance path has completed on a
+bare-metal Rocky Linux x86_64 host. The accepted evidence maps to clean Git
+revision `5f0f89f03f0660e511dee13e49a28b105aea7684` and exact hashes for the Epoch
+binary, guest agent, workloads, scenarios, Firecracker binary, guest kernel,
+base userspace, and prepared root filesystems.
 
-| Area | Implemented | Locally tested on Rocky | MicroVM hardware verified |
+This acceptance is deliberately scoped. It verifies the recorded cold-boot
+clock-smoke and authority-expiry paths on one host. It does not establish
+production readiness, hostile-tenant isolation, snapshot-backed forks, upstream
+host certification, or deterministic execution of arbitrary Linux systems.
+
+| Area | Implemented | Software-tested | Reference-host hardware status |
 | --- | --- | --- | --- |
-| Existing shell bootstrap | Preserved | Prior authoring checks; no administration rerun | Prior user-reported empty-KVM access only |
-| Strict scenarios, planning and exact assertions | Yes | Pass, including malformed input and chronology | Pending |
-| CLI version/doctor/validate/run/report/recover | Yes | Builds; real version/doctor pass; lifecycle uses explicit fake VMM boundaries | Pending |
-| Host privilege and clock observations | Yes | Real ordinary UID, capability inspection, clock reads and comparison tests pass | Guest isolation pending |
-| Private artifacts/copies/locking | Yes | Hash mismatch, cancellation, base preservation, ownership and lock tests pass | Real image copy/boot pending |
-| Firecracker supervision and parent death | Yes | Real owned subprocess, TERM/KILL, pidfd and three controller-SIGKILL tests pass | Firecracker crash-safety experiment pending |
-| Vsock handshake and wire identity | Yes | Real Unix-socket protocol tests pass, including actual hello readiness contract | AF_VSOCK guest session pending |
-| Guest clock guards and readback | Yes | Fake syscall boundary only; no actual setter used | Pending |
-| Guest actions/services and fault fixtures | Yes | Real subprocess tests pass, including descendants, races, deadlines, nonzero exits and output quotas | Guest privilege/init checks pending |
-| Agent-authority-expiry reference workload | Yes | Target-host run pending; unit tests pass on the current authoring host and three scenarios validate | Real guest experiment pending |
-| Evidence, outcome precedence and recovery | Yes | Pass, including host-discontinuity simulation, quota drain, failed publication and interrupted recovery | Abrupt VM/controller experiment pending |
-| Offline guest-image helper and systemd recipe | Yes | Bash syntax and read-only candidate inspection pass | Privileged preparation and boot pending |
-| Explicit nine-scenario clock-probe KVM harness | Yes | Scenario validation, Bash syntax and precise-report predicates pass | Not executed |
+| Strict scenarios, planning and exact assertions | Yes | Pass, including malformed input and chronology | VERIFIED for four recorded scenarios |
+| CLI version/doctor/validate/run/report/recover | Yes | Pass | Version, doctor, probe, validate, run and report VERIFIED; recovery apply not exercised |
+| Host privilege and clock observations | Yes | Pass | Ordinary operator had no active `CAP_SYS_TIME`; pre/post NTP and chrony state retained |
+| Private artifacts, copies and locking | Yes | Pass, including ownership and cancellation | Private image copy and owned successful-run cleanup VERIFIED |
+| Firecracker supervision and parent death | Yes | Pass with owned subprocess, TERM/KILL, pidfd and controller-SIGKILL tests | Normal start/stop VERIFIED; crash-safety remains software-tested only |
+| Vsock handshake and wire identity | Yes | Pass with real Unix-socket protocol tests | Authenticated AF_VSOCK guest session VERIFIED |
+| Guest clock guards and readback | Yes | Pass with fake syscall boundary | Real guest `CLOCK_REALTIME` change and readback VERIFIED |
+| Guest actions and services | Yes | Pass, including descendants, races, deadlines, nonzero exits and quotas | Real systemd guest and UID 10001 workload execution VERIFIED |
+| Agent-authority-expiry reference workload | Yes | Unit and boundary tests pass | Before, after and execution-time revalidation scenarios VERIFIED |
+| Evidence, outcome precedence and recovery | Yes | Pass, including quota, publication and interruption cases | Final evidence and independent successful outcomes VERIFIED; abrupt interruption remains software-tested only |
+| Offline guest-image helper and systemd recipe | Yes | Syntax and safety checks pass | Two workload-specific images prepared and booted successfully |
+| Explicit nine-scenario clock-probe KVM harness | Yes | Predicates and failure variants pass | Full harness NOT TESTED; the smaller `clock-smoke.json` gate passed |
 
 ## Recorded checks
 
-On the reference Rocky host as ordinary UID 1000 with Go 1.26.8:
+The exact revision was built on Rocky with Go 1.26.8:
 
-- `CGO_ENABLED=0 go test -count=1 -timeout 120s ./...`: pass.
+- `go mod download`: pass.
+- `go test ./...`: pass.
 - `go vet ./...`: pass.
-- `bash scripts/check-architecture.sh`: pass; host graph excludes guestclock.
-- `bash scripts/build.sh`: pass; Linux amd64 host, agent and fixture binaries.
-- `epoch version`: 0.1.0-dev, go1.26.8, linux/amd64.
-- Read-only `epoch doctor --json`: pass; SELinux enforcing, cgroup v2, ordinary
-  KVM access and exact Firecracker v1.16.1 executable identity. No probe requested.
-- Final Firecracker/engine regression tests pass after accommodating the actual
-  version command's bounded diagnostic tail.
-- Action/service response allowance and parent-deadline/cancellation tests pass.
-  The declared workload timeout is unchanged; bounded response time cannot extend
-  the overall run deadline.
-- Cancellation during guest shutdown and VMM cleanup is preserved in the final
-  report; five regression cases pass, including incomplete-cleanup precedence.
-- The clock-probe harness accepts nine synthetic expected reports and rejects 18 unrelated
-  failure variants, including VM crashes, lost responses and missing clock data.
-  These checks do not boot a guest or establish hardware acceptance.
-- Three authority-expiry scenario declarations pass strict parser/semantic tests.
-  Their workload logic is unit-tested without an LLM, network, container runtime,
-  external authorization service or host side effect. They have not run in a guest.
+- `bash scripts/check-architecture.sh`: pass; the host graph excludes
+  `guestclock`.
+- `bash scripts/build.sh`: pass; Linux amd64 host, agent and workload binaries.
+- `git diff --check`: pass.
+- `go test -race ./...`: not run because the inspected host had no C compiler.
 
-The Linux source dependency scan with govulncheck v1.7.0 found no known
-vulnerabilities across the application, pinned modules and Go 1.26.8 standard
-library (database timestamp 2026-09-02T19:12:04Z). This is point-in-time tooling
-evidence, not a security certification. Race instrumentation is pending a working
-C compiler on the reference host; none was found in the inspected PATH.
+`epoch doctor --probe --json` reported ordinary UID 1000, SELinux enforcing,
+cgroup v2, readable/writable group-based KVM access, a successful empty-KVM probe,
+and exact Firecracker 1.16.1 executable identity. The normal runtime remained an
+ordinary-user foreground process and did not use the jailer.
 
-## Preparation evidence
+The accepted representative runs were:
 
-Go 1.26.8 was installed into an ordinary-user tool directory after checking the
-published archive SHA-256. No system package, profile, network, time-service or
-SELinux changes were made. The original bootstrap remains separate.
+| Scenario | Run ID | Execution | Assertions | Cleanup |
+| --- | --- | --- | --- | --- |
+| Clock smoke | `a132d09fe7cbfdd6949b0aedb1ace68d` | `COMPLETED` | `PASS` | `COMPLETE` |
+| Authority before expiry | `17a24e3cb125188db33cf99cc9472fde` | `COMPLETED` | `PASS` | `COMPLETE` |
+| Authority after expiry | `47ebb5402063e9e3b298d7e5a0a383e2` | `COMPLETED` | `PASS` | `COMPLETE` |
+| Authority TOCTOU | `251a079ec8db9f5d0206fab1358623ea` | `COMPLETED` | `PASS` | `COMPLETE` |
 
-The original lab contained Firecracker and image-catalogue metadata, with no
-prepared guest. Candidate kernel 6.1.155 and Ubuntu 24.04 squashfs inputs were then
-selected from actual published v1.15 object keys, downloaded during explicit
-preparation and hashed again on Rocky. See artifacts/guest-inputs.candidate.lock.json.
-Firecracker itself remains v1.16.1; no VMM downgrade occurred. These are candidates,
-not boot-verified images. Their observed hashes are not upstream signatures.
+The clock-smoke run cold-booted the guest, completed the authenticated guest-agent
+handshake over vsock, moved the guest wall clock across the 1999/2000 boundary,
+ran the declared clock-probe as UID 10001, preserved workload-local state across
+the clock step, evaluated typed assertions, published the final report, and
+removed owned runtime resources.
 
-Read-only checks confirmed kernel ELF64 x86-64, built-in vsock/virtio block/ext4/
-devtmpfs support, valid squashfs, real systemd and empty pseudo-filesystem input
-directories. The privileged image helper has not been executed. No KVM guest,
-real clock setter or opt-in hardware harness has been run by this implementation.
+The authority runs observed `AUTHORIZED` with a simulated side effect before
+expiry, `DENY_EXPIRED` without a side effect after expiry, and a TOCTOU transition
+from an accepted `AUTHORIZED` request to `DENY_EXPIRED` at the later execution
+boundary with restart count zero.
 
-Reference host kernel 5.14.0-687.42.1.el9_8.x86_64 remains a lab compatibility
-target outside Firecracker v1.16.1's upstream host validation matrix. No claim of
-upstream certification, reproducibility, deterministic execution, enterprise
-readiness or production availability follows from these checks.
+## Scoped repeatability and timings
+
+Twenty new cold-boot executions were run for each authority scenario. All 60/60
+completed with execution `COMPLETED`, assertions `PASS`, and cleanup `COMPLETE`.
+For each scenario, all 20 normalized semantic observations produced one SHA-256
+value. The normalization retains declared temporal targets, decisions, side
+effects, workload state, assertions, and independent outcome dimensions while
+excluding volatile run IDs, timestamps, and durations.
+
+This supports the statement that the tested temporal scenarios produced
+repeatable normalized semantic observations and assertion outcomes across 20
+executions per scenario under the recorded configuration. It does not support a
+general deterministic-execution guarantee.
+
+Measured values are reported only where the existing event model exposes them.
+Across the 60 authority runs, median total duration was 2.979 seconds and p95 was
+3.041 seconds. The combined Firecracker-start, guest-boot, vsock-ready phase had a
+714.8 ms median and 715.8 ms p95. Firecracker launch versus guest readiness,
+assertion latency, evidence-persistence latency, and final report-write latency
+are not separately instrumented and are not estimated.
+
+## Host-clock safety
+
+The host wall clock progressed normally throughout the experiment. Before and
+after the representative and repetition runs, `timedatectl` reported NTP active
+and the system clock synchronized; `chronyc tracking` reported leap status
+`Normal`. The ordinary operator's current and ambient capability sets were empty,
+so the process did not possess active host `CAP_SYS_TIME`. No host time-setting or
+time-synchronization change was part of the procedure.
+
+## Evidence and remaining limits
+
+The compact [hardware evidence](../evidence/rocky-linux-x86_64/2026-09-20/summary.md)
+contains the source/artifact manifest, representative semantic outcomes,
+repeatability summary, and measurements. Raw reports, event streams, clock
+observations, Firecracker logs, host captures, and per-run normalized records are
+retained privately outside Git. Large images and binaries are not committed.
+
+Exploratory runs before the accepted revision exposed a missing ambient
+`CAP_SETUID` in the guest service and an empty-envelope mismatch in the TOCTOU
+workload. Those failures remain in the private evidence set; the accepted images
+and all reported pass counts use the exact final revision and hashes above.
+
+The Rocky host kernel `5.14.0-687.42.1.el9_8.x86_64` remains outside Firecracker
+1.16.1's upstream validation matrix. Direct non-jailer execution, lack of host
+cgroup quotas, hostile workloads, abrupt VM/controller failure on real hardware,
+power-loss durability, snapshot restore, and multi-branch orchestration remain
+outside the verified boundary. Epoch is not production-ready.

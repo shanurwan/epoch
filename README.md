@@ -17,15 +17,25 @@ temporal executions from equivalent declared image inputs. They are not
 Firecracker memory-snapshot forks and do not begin from identical RAM/device state.
 
 The project thesis uses “deterministic” as the target for controlled batch and
-expiry testing. Deterministic execution has not yet been established by hardware
-evidence. See [Temporal forking](docs/temporal-forking.md) for the precise current
-capability and roadmap.
+expiry testing. On the recorded reference host, each of the three authority
+scenarios produced one normalized semantic result across 20 fresh executions.
+That is a scoped repeatability result for those declarations and fields, not a
+claim of deterministic execution for arbitrary Linux systems. See
+[Temporal forking](docs/temporal-forking.md) for the precise current capability
+and roadmap.
 
-**Validation boundary:** the target host is bare-metal Rocky Linux x86_64. The Go
-engine and guest agent are implemented; see the status matrix for test evidence.
-A successful real guest boot, vsock session and guest-clock experiment have not
-yet been verified. This is not a claim of
-production readiness, deterministic execution or hostile-tenant isolation.
+**Validation boundary:** revision `5f0f89f03f0660e511dee13e49a28b105aea7684`
+was exercised on a bare-metal Rocky Linux 9.8 x86_64 host with KVM and
+Firecracker 1.16.1. The recorded path verifies guest boot, authenticated
+guest-agent/vsock communication, guest-only wall-clock changes, declared workload
+execution, typed assertions, persistent evidence, and owned cleanup. This is not
+a claim of production readiness, general deterministic execution, upstream host
+certification, or hostile-tenant isolation.
+
+The compact [hardware evidence](evidence/rocky-linux-x86_64/2026-09-20/summary.md)
+records exact source and artifact hashes, representative run IDs, host-clock
+safety observations, repeatability counts, measured timings, and limitations.
+Large guest images and raw private run logs remain outside Git.
 
 ## Core and reference workloads
 

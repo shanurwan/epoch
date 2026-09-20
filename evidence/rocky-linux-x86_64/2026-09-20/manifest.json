@@ -1,0 +1,103 @@
+{
+  "api_version": "epoch-hardware-evidence/v1",
+  "experiment_date": "2026-09-20",
+  "claim_scope": "Cold-boot temporal executions for the clock-smoke and authority-expiry reference scenarios on the recorded host; not arbitrary Linux determinism or snapshot-backed forking.",
+  "source": {
+    "git_sha": "5f0f89f03f0660e511dee13e49a28b105aea7684",
+    "working_tree_clean": true,
+    "epoch_binary_sha256": "13abb66a400e6cde8c43ab6c8fac5877c1c47745e3995a21eeea18270bc5c733",
+    "guestagent_sha256": "2abb7f756634cabdb2c2ea18002e36b8284186044318d91590159f486431d796",
+    "clock_probe_sha256": "32804036845fe15abc4c86ca9f9f3a3594278f38410e73abffcaa0ad025a3d05",
+    "authority_workload_sha256": "b4cf378d8e5cbd5e412c380b39e98557017a5ac81db3b52b24008319ace34d08"
+  },
+  "host": {
+    "platform": "bare-metal Rocky Linux host",
+    "os": "Rocky Linux 9.8 (Blue Onyx)",
+    "kernel": "5.14.0-687.42.1.el9_8.x86_64",
+    "architecture": "x86_64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1265U",
+    "logical_cpus": 12,
+    "memory_gib": 30,
+    "selinux": "enforcing",
+    "cgroup": "v2",
+    "kvm_accessible": true,
+    "kvm_probe_passed": true,
+    "operator_active_cap_sys_time": false
+  },
+  "toolchain": {
+    "go": "go1.26.8 linux/amd64",
+    "race_test": "NOT_RUN_NO_C_COMPILER"
+  },
+  "firecracker": {
+    "version": "1.16.1",
+    "sha256": "2fd0171309af7e24cf8dafc8a6f921c1434c49b5f9349bb996b7ed0a4deb8aa7",
+    "jailer_sha256": "1f3a0c1fe86212d0001819bfe0819071c01208b3ccc9398c3b3bc1b84cf21edd",
+    "execution_mode": "direct non-jailer"
+  },
+  "guest_inputs": {
+    "kernel_identity": "vmlinux-6.1.155",
+    "kernel_sha256": "e20e46d0c36c55c0d1014eb20576171b3f3d922260d9f792017aeff53af3d4f2",
+    "base_userspace_identity": "ubuntu-24.04.squashfs",
+    "base_userspace_sha256": "68321e0482baeb3844dafe8a6b08a6902401a7afc41fbfd8c3d9ea08aadd244f",
+    "clock_probe_rootfs_sha256": "8948ff47f36562dde1df9f0841104819216a9309092b7afe66b3ca58fefb83c4",
+    "authority_expiry_rootfs_sha256": "695029167eb229e274eb41dbfcefeccc8b96ded768e53e7abb2e3e7a05e46571"
+  },
+  "scenarios": [
+    {
+      "file": "scenarios/clock-smoke.json",
+      "sha256": "61cc1bed09572271af48addf95d07f488fe7c89cc486735862b34854957af4ef",
+      "run_id": "a132d09fe7cbfdd6949b0aedb1ace68d",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "file": "scenarios/agent-authority-before-expiry.json",
+      "sha256": "9062d0afb49a0193a906e804671529e1c19645e088b2303eafcef71a06650b78",
+      "run_id": "17a24e3cb125188db33cf99cc9472fde",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "file": "scenarios/agent-authority-after-expiry.json",
+      "sha256": "4aba72da8153a90d99b885fb6c4ecb0f5ec61229d3752b94c3b3325a4968b894",
+      "run_id": "47ebb5402063e9e3b298d7e5a0a383e2",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "file": "scenarios/agent-authority-toctou.json",
+      "sha256": "ff24be7d936e4b9ecb10bd2afe6ea8fdc6907cfd2a9462add0c6beae546d44c6",
+      "run_id": "251a079ec8db9f5d0206fab1358623ea",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    }
+  ],
+  "repeatability": {
+    "runs_per_authority_scenario": 20,
+    "runs_attempted": 60,
+    "runs_completed": 60,
+    "execution_passes": 60,
+    "assertion_passes": 60,
+    "cleanup_passes": 60,
+    "unique_normalized_result_hashes_per_scenario": 1
+  },
+  "host_clock_safety": {
+    "host_clock_set_performed": false,
+    "ntp_before": "active and synchronized",
+    "ntp_after": "active and synchronized",
+    "chrony_leap_status_before": "Normal",
+    "chrony_leap_status_after": "Normal"
+  },
+  "limitations": [
+    "The executions cold-booted independent guests from equivalent declared inputs; no memory snapshot or restore was used.",
+    "The repeatability result applies only to documented normalized semantic fields in these scenarios.",
+    "Firecracker launch and guest readiness are measured as one combined phase.",
+    "Assertion and evidence-persistence latency are not separately instrumented.",
+    "The direct non-jailer trusted-lab path is not a hostile-tenant isolation claim.",
+    "The Rocky 5.14 host kernel is outside Firecracker 1.16.1's upstream validation matrix."
+  ]
+}

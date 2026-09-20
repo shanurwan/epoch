@@ -1,0 +1,42 @@
+{
+  "api_version": "epoch-repeatability/v1",
+  "source_sha": "5f0f89f03f0660e511dee13e49a28b105aea7684",
+  "repeat_count_per_scenario": 20,
+  "normalization": "Stable scenario decisions, side effects, state, statuses, assertion IDs/statuses, and declared temporal targets; volatile IDs, timestamps, and durations excluded.",
+  "percentile_method": "nearest-rank over total run elapsed_ns",
+  "scenarios": [
+    {
+      "scenario": "agent-authority-before-expiry.json",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_sha256": "8a136c783cd4f4c190f89ca633ed02977367ce32554ddcb1549b4ea29fc95c02",
+      "total_run_duration_ns": {"min":2962010919,"p50":2975736834,"p95":3040660579,"max":3045784200}
+    },
+    {
+      "scenario": "agent-authority-after-expiry.json",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_sha256": "9ee6e2c4a12f4220451b3455db45ad269d65b180a4286ff028823b4b0f14ba7a",
+      "total_run_duration_ns": {"min":2964510356,"p50":2973723871,"p95":3006631859,"max":3073915062}
+    },
+    {
+      "scenario": "agent-authority-toctou.json",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_sha256": "9c02a9717c154b351e6f584b630f6f7ede0e8597b55c066ce1ec9cc8c6093123",
+      "total_run_duration_ns": {"min":2969771534,"p50":2980219116,"p95":3036540653,"max":3043155040}
+    }
+  ]
+}

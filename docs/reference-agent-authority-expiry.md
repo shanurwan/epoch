@@ -69,7 +69,7 @@ software, and base image ID. They differ in guest wall-clock target:
 These are separate cold-boot temporal executions with fresh private disk copies.
 They do not claim identical VM memory or snapshot restore. The one-second boundary
 case intentionally matches the research example; the scenario uses a 100 ms clock
-readback tolerance, and real guest behavior remains hardware-unverified.
+readback tolerance.
 
 ## TOCTOU revalidation
 
@@ -96,7 +96,24 @@ ends with an error.
 ## Validation status
 
 The authority evaluator, exact interval boundaries, execution-time revalidation,
-and workload-local state behavior are implemented and unit-tested. The three
-portable Epoch scenarios pass parser/semantic validation. They have not been run
-in a real Firecracker guest; no successful boot, vsock session, guest clock change,
-deterministic replay, performance, or reliability claim follows.
+and workload-local state behavior are implemented and unit-tested. At revision
+`5f0f89f03f0660e511dee13e49a28b105aea7684`, all three portable scenarios also
+ran successfully in real Firecracker guests on the recorded bare-metal Rocky
+Linux host:
+
+| Scenario | Observed semantic outcome | Final outcomes |
+| --- | --- | --- |
+| Before expiry | `AUTHORIZED`; side effect performed; restart count 1 | `COMPLETED` / `PASS` / `COMPLETE` |
+| After expiry | `DENY_EXPIRED`; no side effect | `COMPLETED` / `PASS` / `COMPLETE` |
+| TOCTOU | initial `AUTHORIZED`; execution `DENY_EXPIRED`; no side effect; restart count 0 | `COMPLETED` / `PASS` / `COMPLETE` |
+
+Twenty fresh executions of each scenario produced one normalized semantic-result
+hash per scenario with 20/20 execution, assertion, and cleanup passes. The
+normalization retains decisions, side effects, workload state, declared temporal
+targets, assertion statuses, and outcome dimensions while excluding volatile run
+IDs, timestamps, and durations. See the
+[hardware evidence](../evidence/rocky-linux-x86_64/2026-09-20/summary.md).
+
+This is a scoped result for these workloads, images, host, and normalized fields.
+It is not a reliability percentage, a general deterministic-execution claim, or
+evidence of snapshot-backed forks.

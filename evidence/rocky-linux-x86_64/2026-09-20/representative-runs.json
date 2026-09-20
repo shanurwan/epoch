@@ -1,0 +1,65 @@
+{
+  "api_version": "epoch-representative-runs/v1",
+  "source_sha": "5f0f89f03f0660e511dee13e49a28b105aea7684",
+  "runs": [
+    {
+      "scenario": "clock-smoke-1999",
+      "run_id": "a132d09fe7cbfdd6949b0aedb1ace68d",
+      "targets": ["1999-12-31T23:59:00Z", "2000-01-01T00:01:00Z"],
+      "readbacks_valid": true,
+      "workload_uid": 10001,
+      "workload_state_persisted_across_clock_step": true,
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE",
+      "elapsed_ns": 3012034009
+    },
+    {
+      "scenario": "agent-authority-before-expiry",
+      "run_id": "17a24e3cb125188db33cf99cc9472fde",
+      "guest_target": "2035-01-01T12:00:29Z",
+      "operation": "worker.restart",
+      "resource": "worker-17",
+      "initial_authorization": "AUTHORIZED",
+      "execution_authorization": "AUTHORIZED",
+      "request_accepted": true,
+      "side_effect_performed": true,
+      "restart_count": 1,
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE",
+      "elapsed_ns": 2983465170
+    },
+    {
+      "scenario": "agent-authority-after-expiry",
+      "run_id": "47ebb5402063e9e3b298d7e5a0a383e2",
+      "guest_target": "2035-01-01T12:00:31Z",
+      "operation": "worker.restart",
+      "resource": "worker-17",
+      "initial_authorization": "DENY_EXPIRED",
+      "request_accepted": false,
+      "side_effect_performed": false,
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE",
+      "elapsed_ns": 2983710573
+    },
+    {
+      "scenario": "agent-authority-toctou",
+      "run_id": "251a079ec8db9f5d0206fab1358623ea",
+      "request_guest_target": "2035-01-01T12:00:25Z",
+      "execution_guest_target": "2035-01-01T12:00:35Z",
+      "operation": "worker.restart",
+      "resource": "worker-17",
+      "initial_authorization": "AUTHORIZED",
+      "execution_authorization": "DENY_EXPIRED",
+      "request_accepted": true,
+      "side_effect_performed": false,
+      "restart_count": 0,
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE",
+      "elapsed_ns": 2972884410
+    }
+  ]
+}
