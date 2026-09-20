@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -155,7 +156,8 @@ func requireEmptyInput(r io.Reader) error {
 	if len(b) > maxInputBytes {
 		return errors.New("workload input quota exceeded")
 	}
-	if strings.TrimSpace(string(b)) != "" {
+	trimmed := bytes.TrimSpace(b)
+	if len(trimmed) != 0 && !bytes.Equal(trimmed, []byte("{}")) {
 		return errors.New("execute-pending does not accept input")
 	}
 	return nil

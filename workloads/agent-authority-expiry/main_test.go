@@ -4,9 +4,23 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
+
+func TestExecutePendingAcceptsOnlyEmptyActionInput(t *testing.T) {
+	for _, input := range []string{"", "{}", "  {}\n"} {
+		if err := requireEmptyInput(strings.NewReader(input)); err != nil {
+			t.Errorf("requireEmptyInput(%q): %v", input, err)
+		}
+	}
+	for _, input := range []string{"null", "[]", `{"unexpected":true}`} {
+		if err := requireEmptyInput(strings.NewReader(input)); err == nil {
+			t.Errorf("requireEmptyInput(%q) accepted non-empty input", input)
+		}
+	}
+}
 
 var (
 	notBefore = time.Date(2035, 1, 1, 12, 0, 0, 0, time.UTC)
