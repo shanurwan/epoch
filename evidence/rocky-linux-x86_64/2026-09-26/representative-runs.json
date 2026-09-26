@@ -1,0 +1,86 @@
+{
+  "api_version": "epoch-representative-runs/v1",
+  "mcp": {
+    "transport": "stdio",
+    "discovered_tools": [
+      "incident_inspect",
+      "incident_list",
+      "worker_restart",
+      "worker_status"
+    ],
+    "call_order": [
+      "incident_list",
+      "incident_inspect",
+      "worker_status",
+      "worker_restart",
+      "worker_status"
+    ]
+  },
+  "runs": [
+    {
+      "scenario": "before-expiry",
+      "run_id": "e2d0eaf44f343f01824e24fd74ab1f6d",
+      "guest_target": "2035-01-01T12:00:20Z",
+      "initial_check": {
+        "time": "2035-01-01T12:00:20.023160062Z",
+        "decision": "AUTHORIZED"
+      },
+      "execution_check": {
+        "time": "2035-01-01T12:00:20.023536844Z",
+        "decision": "AUTHORIZED"
+      },
+      "restart_count_before": 0,
+      "restart_count_after": 1,
+      "health_before": "unhealthy",
+      "health_after": "healthy",
+      "side_effect_performed": true,
+      "audit_decision": "AUTHORIZED",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "scenario": "after-expiry",
+      "run_id": "7084f7cfe211a5527a9e17042e7b3b54",
+      "guest_target": "2035-01-01T12:00:31Z",
+      "initial_check": {
+        "time": "2035-01-01T12:00:31.034293965Z",
+        "decision": "DENY_EXPIRED"
+      },
+      "execution_check": null,
+      "restart_count_before": 0,
+      "restart_count_after": 0,
+      "health_before": "unhealthy",
+      "health_after": "unhealthy",
+      "side_effect_performed": false,
+      "audit_decision": "DENY_EXPIRED",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "scenario": "real-toctou",
+      "run_id": "1442d841957a3e3db60f086a455636f9",
+      "guest_target": "2035-01-01T12:00:25Z",
+      "initial_check": {
+        "time": "2035-01-01T12:00:25.031146082Z",
+        "decision": "AUTHORIZED"
+      },
+      "execution_check": {
+        "time": "2035-01-01T12:00:32.036383397Z",
+        "decision": "DENY_EXPIRED"
+      },
+      "execution_delay_ms": 7000,
+      "observed_wall_clock_elapsed_ms": 7005,
+      "restart_count_before": 0,
+      "restart_count_after": 0,
+      "health_before": "unhealthy",
+      "health_after": "unhealthy",
+      "side_effect_performed": false,
+      "audit_decision": "DENY_EXPIRED",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    }
+  ]
+}

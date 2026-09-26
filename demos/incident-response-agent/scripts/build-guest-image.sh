@@ -133,14 +133,14 @@ mv -fT -- "$manifest_tmp" "$manifest_path"
 
 demo_provenance=$output/demo-provenance.json
 jq -n \
-  --arg module 'demos/incident-response-agent' \
+  --arg module_name 'demos/incident-response-agent' \
   --arg agent "$(sha256sum -- "$tree/usr/local/libexec/incident-response-agent" | cut -d' ' -f1)" \
   --arg server "$(sha256sum -- "$tree/opt/epoch/bin/incident-ops-mcp" | cut -d' ' -f1)" \
   --arg issuer "$(sha256sum -- "$tree/opt/epoch/bin/incident-authority-issuer" | cut -d' ' -f1)" \
   --arg bootstrap "$(sha256sum -- "$tree/opt/epoch/bin/incident-postgres-bootstrap" | cut -d' ' -f1)" \
   --arg postgres "$(sha256sum -- "$tree/usr/lib/postgresql/16/bin/postgres" | cut -d' ' -f1)" \
   --arg initdb "$(sha256sum -- "$tree/usr/lib/postgresql/16/bin/initdb" | cut -d' ' -f1)" \
-  '{api_version:"epoch-demo-provenance/v1", module:$module, sha256:{agent:$agent, mcp_server:$server, authority_issuer:$issuer, postgres_bootstrap:$bootstrap, postgres:$postgres, initdb:$initdb}}' \
+  '{api_version:"epoch-demo-provenance/v1", "module":$module_name, sha256:{agent:$agent, mcp_server:$server, authority_issuer:$issuer, postgres_bootstrap:$bootstrap, postgres:$postgres, initdb:$initdb}}' \
   > "$demo_provenance"
 
 owner=$(stat -c %u -- "$output")

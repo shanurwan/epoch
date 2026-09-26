@@ -22,7 +22,7 @@ host certification, or deterministic execution of arbitrary Linux systems.
 | Guest clock guards and readback | Yes | Pass with fake syscall boundary | Real guest `CLOCK_REALTIME` change and readback VERIFIED |
 | Guest actions and services | Yes | Pass, including descendants, races, deadlines, nonzero exits and quotas | Real systemd guest and UID 10001 workload execution VERIFIED |
 | Agent-authority-expiry reference workload | Yes | Unit and boundary tests pass | Before, after and execution-time revalidation scenarios VERIFIED |
-| Isolated incident-response MCP/PostgreSQL reference application | Yes | Demo-module authority, handler, structured MCP and deterministic-decision tests pass | NOT TESTED on Firecracker hardware |
+| Isolated incident-response MCP/PostgreSQL reference application | Yes | Demo-module authority, handler, structured MCP and deterministic-decision tests pass | VERIFIED in a recorded working-tree hardware run; not yet clean-revision evidence |
 | Evidence, outcome precedence and recovery | Yes | Pass, including quota, publication and interruption cases | Final evidence and independent successful outcomes VERIFIED; abrupt interruption remains software-tested only |
 | Offline guest-image helper and systemd recipe | Yes | Syntax and safety checks pass | Two workload-specific images prepared and booted successfully |
 | Explicit nine-scenario clock-probe KVM harness | Yes | Predicates and failure variants pass | Full harness NOT TESTED; the smaller `clock-smoke.json` gate passed |
@@ -65,11 +65,27 @@ expiry, `DENY_EXPIRED` without a side effect after expiry, and a TOCTOU transiti
 from an accepted `AUTHORIZED` request to `DENY_EXPIRED` at the later execution
 boundary with restart count zero.
 
-The separate `demos/incident-response-agent` application is not part of this
-accepted hardware set. Its PostgreSQL-in-guest image extension and three
-`incident-response-mcp-*` scenarios remain implemented/software-tested only until
-new hardware evidence records successful guest startup, MCP calls, database
-transitions, audits, assertions, and cleanup.
+The separate `demos/incident-response-agent` application is not part of the clean
+`5f0f89f` acceptance above. A later working-tree exercise based on revision
+`710e94bf2d427a38aa25f9bdcf7706ba427f38b0` plus validated code-patch SHA-256
+`bf4ad9d09fa34ff1a02934acbaf6aa1b362e7741f8f2f3e7db935309b3f8441e`
+verified its guest startup, PostgreSQL initialization, MCP calls, database
+transitions, audits, assertions, and cleanup. It remains working-tree evidence
+until those changes are committed and rerun from that clean revision.
+
+The representative stateful runs were:
+
+| Scenario | Run ID | Execution | Assertions | Cleanup |
+| --- | --- | --- | --- | --- |
+| MCP/PostgreSQL before expiry | `e2d0eaf44f343f01824e24fd74ab1f6d` | `COMPLETED` | `PASS` | `COMPLETE` |
+| MCP/PostgreSQL after expiry | `7084f7cfe211a5527a9e17042e7b3b54` | `COMPLETED` | `PASS` | `COMPLETE` |
+| MCP/PostgreSQL real TOCTOU | `1442d841957a3e3db60f086a455636f9` | `COMPLETED` | `PASS` | `COMPLETE` |
+
+Before expiry, the database changed `restart_count` from zero to one and worker
+health from `unhealthy` to `healthy`. After expiry, both remained unchanged. In
+the real TOCTOU run, actual guest-clock checks moved from `AUTHORIZED` at
+`12:00:25.031Z` to `DENY_EXPIRED` at `12:00:32.036Z` after 7005 ms, immediately
+before the denied transaction.
 
 ## Scoped repeatability and timings
 
@@ -92,6 +108,15 @@ Across the 60 authority runs, median total duration was 2.979 seconds and p95 wa
 assertion latency, evidence-persistence latency, and final report-write latency
 are not separately instrumented and are not estimated.
 
+The stateful MCP/PostgreSQL scenarios were also repeated 20 times each. All
+60/60 runs completed with execution `COMPLETED`, assertions `PASS`, and cleanup
+`COMPLETE`; each scenario produced one normalized semantic hash. Median total
+duration was 4.612 seconds before expiry, 4.626 seconds after expiry, and 11.699
+seconds for the deliberate seven-second TOCTOU case. The combined Firecracker
+launch, guest boot, PostgreSQL initialization, guest-agent readiness, and vsock
+handshake had medians between 1.214 and 1.215 seconds. See the recorded
+performance JSON for min, median, p95, max, and instrumentation limits.
+
 ## Host-clock safety
 
 The host wall clock progressed normally throughout the experiment. Before and
@@ -108,6 +133,9 @@ contains the source/artifact manifest, representative semantic outcomes,
 repeatability summary, and measurements. Raw reports, event streams, clock
 observations, Firecracker logs, host captures, and per-run normalized records are
 retained privately outside Git. Large images and binaries are not committed.
+
+The later [stateful reference evidence](../evidence/rocky-linux-x86_64/2026-09-26/summary.md)
+uses the same compact convention and records its non-clean working-tree provenance.
 
 Exploratory runs before the accepted revision exposed a missing ambient
 `CAP_SETUID` in the guest service and an empty-envelope mismatch in the TOCTOU

@@ -126,7 +126,11 @@ bash demos/incident-response-agent/scripts/verify-reference-repeatability.sh --a
   20
 ```
 
-No repeatability or hardware result is claimed here. Guest boot, PostgreSQL startup, MCP stdio execution, real temporal-boundary behavior, and repetition remain unverified until the resulting hardware evidence demonstrates them.
+The [2026-09-26 working-tree evidence](../../evidence/rocky-linux-x86_64/2026-09-26/summary.md)
+records successful guest boot, PostgreSQL startup, MCP stdio execution, real
+temporal-boundary behavior, and 20/20 repetitions per scenario. It is based on a
+recorded Git revision plus an uncommitted patch and therefore is not clean-revision
+acceptance evidence.
 
 ## Development checks
 

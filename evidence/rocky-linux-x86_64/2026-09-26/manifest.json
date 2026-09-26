@@ -1,0 +1,115 @@
+{
+  "api_version": "epoch-hardware-evidence/v1",
+  "experiment_date": "2026-09-26",
+  "claim_scope": "Cold-boot incident-response MCP/PostgreSQL temporal executions on the recorded host; not arbitrary Linux determinism or snapshot-backed forking.",
+  "source": {
+    "git_sha": "710e94bf2d427a38aa25f9bdcf7706ba427f38b0",
+    "working_tree_clean": false,
+    "validation_kind": "working-tree",
+    "validated_code_patch_sha256": "bf4ad9d09fa34ff1a02934acbaf6aa1b362e7741f8f2f3e7db935309b3f8441e",
+    "changed_paths": [
+      "demos/incident-response-agent/guest/incident-postgres-ready.service",
+      "demos/incident-response-agent/guest/incident-postgres.service",
+      "demos/incident-response-agent/scripts/build-guest-image.sh"
+    ],
+    "epoch_binary_sha256": "adf5717d3ae1e86435ddf9babf32dc737e339555a5714e5d8bdf8922fb6eeaf1",
+    "guestagent_sha256": "11640a031ae34ee60982ea8b2420f109e16f4473e2186fab0cf9ec60b630baa9"
+  },
+  "host": {
+    "platform": "bare-metal Rocky Linux host",
+    "os": "Rocky Linux 9.8 (Blue Onyx)",
+    "kernel": "5.14.0-687.42.1.el9_8.x86_64",
+    "architecture": "x86_64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1265U",
+    "selinux": "enforcing",
+    "cgroup": "v2",
+    "kvm_accessible": true,
+    "kvm_probe_passed": true,
+    "operator_active_cap_sys_time": false
+  },
+  "toolchain": {
+    "go": "go1.26.8 linux/amd64",
+    "race_test": "NOT_RUN_NO_C_COMPILER"
+  },
+  "firecracker": {
+    "version": "1.16.1",
+    "sha256": "2fd0171309af7e24cf8dafc8a6f921c1434c49b5f9349bb996b7ed0a4deb8aa7",
+    "jailer_sha256": "1f3a0c1fe86212d0001819bfe0819071c01208b3ccc9398c3b3bc1b84cf21edd",
+    "execution_mode": "direct non-jailer"
+  },
+  "guest_inputs": {
+    "kernel_identity": "vmlinux-6.1.155",
+    "kernel_sha256": "e20e46d0c36c55c0d1014eb20576171b3f3d922260d9f792017aeff53af3d4f2",
+    "base_userspace_identity": "ubuntu-24.04.squashfs",
+    "base_userspace_sha256": "68321e0482baeb3844dafe8a6b08a6902401a7afc41fbfd8c3d9ea08aadd244f",
+    "postgresql_package_closure_sha256": "bdb0fdecaa15543215585fef4db10cb4fe9e5ec17aa3b9919bfab230ad9d6d7d",
+    "rootfs_sha256": "18538197e89607487d1ab9bf0f9904c076ff056e66778f3fce31466ecad4a27f",
+    "image_manifest_sha256": "5876cc86c7bc1c077f24b27ea1cad737d9917022f25aca81899fde8e28e6026e",
+    "workload_manifest_sha256": "61cc6adf6c21aeb925c6be8e2823894ce516a1b4f5b651c9cbf971782c370289",
+    "demo_provenance_sha256": "151702b6515b9e65e9fadfb8e848ff29eb4c003d4b799876aa7623c711a12893"
+  },
+  "demo_binaries": {
+    "agent_sha256": "1c7a4a4154581fb1126531ba1550cf9ffb53b79d1d63f606321517cff216b464",
+    "mcp_server_sha256": "13585db564d3e943270f9e5bea8f5d8cc8ac57ad07f5cdc96a0d886f9076d691",
+    "authority_issuer_sha256": "d7ccec186b1acf659ced8855e49c8b624b4626c66ea469ad9dda9bafb9c1e9be",
+    "postgres_bootstrap_sha256": "bd4c5b3dd27174ce9f655b7e622a759f1dc70e8cd6431bcb75ca90708440dcc9",
+    "postgres_sha256": "201d8daff9a5bd9df70b820471b965c39f5a776d677f395232c477d051270722",
+    "initdb_sha256": "df8c50fd508bb31db312a8519a2e7922c63b44f7d963c39d58dc107169078a0d"
+  },
+  "scenarios": [
+    {
+      "file": "scenarios/incident-response-mcp-before-expiry.json",
+      "sha256": "28bab4577f1025c3532060f2f5a28b689fb49c648f1157289e2a63d6fda3ab4e",
+      "run_id": "e2d0eaf44f343f01824e24fd74ab1f6d",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "file": "scenarios/incident-response-mcp-after-expiry.json",
+      "sha256": "b893ca2dc863d58b5ee64ff303745b3bb907284bf9fe9a401d78acd2f4d0c924",
+      "run_id": "7084f7cfe211a5527a9e17042e7b3b54",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    },
+    {
+      "file": "scenarios/incident-response-mcp-toctou.json",
+      "sha256": "695f1aec7ea35ae0b6867e1e5f2484f0abd9e0b575d3861e8904e1c40a27b019",
+      "run_id": "1442d841957a3e3db60f086a455636f9",
+      "execution": "COMPLETED",
+      "assertions": "PASS",
+      "cleanup": "COMPLETE"
+    }
+  ],
+  "repeatability": {
+    "runs_per_scenario": 20,
+    "runs_attempted": 60,
+    "runs_completed": 60,
+    "execution_passes": 60,
+    "assertion_passes": 60,
+    "cleanup_passes": 60,
+    "unique_normalized_result_hashes_per_scenario": 1
+  },
+  "host_clock_safety": {
+    "host_clock_set_performed": false,
+    "ntp_before": "active and synchronized",
+    "ntp_after": "active and synchronized",
+    "chrony_leap_status_before": "Normal",
+    "chrony_leap_status_after": "Normal"
+  },
+  "initial_failed_gate": {
+    "run_id": "582249b7e351e5ec740894f236f5bcb8",
+    "result": "boot readiness deadline",
+    "cause": "unprivileged PostgreSQL systemd service could not reopen /dev/console (209/STDOUT)",
+    "cleanup": "COMPLETE",
+    "disposition": "retained externally; corrected by the recorded working-tree patch"
+  },
+  "limitations": [
+    "This is working-tree evidence based on the recorded Git SHA plus a recorded patch, not clean-revision evidence.",
+    "The executions cold-booted independent guests from equivalent declared inputs; no memory snapshot or restore was used.",
+    "The repeatability result applies only to documented normalized semantic fields in these scenarios.",
+    "The direct non-jailer trusted-lab path is not a hostile-tenant isolation claim.",
+    "The Rocky 5.14 host kernel is outside Firecracker 1.16.1's upstream validation matrix."
+  ]
+}

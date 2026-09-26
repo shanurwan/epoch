@@ -115,7 +115,10 @@ and `incident-response-mcp-toctou` scenarios exercise the isolated
 `demos/incident-response-agent` application through the same generic action and
 assertion boundary. That application uses real MCP stdio calls and an in-guest
 PostgreSQL side effect; none of its domain types or dependencies are part of
-Epoch core. These scenarios have not yet been hardware-verified.
+Epoch core. These scenarios were hardware-exercised in the recorded 2026-09-26
+working-tree evidence: 20/20 runs per scenario completed with one normalized
+semantic result per scenario. This is not yet clean-revision evidence and does
+not establish general deterministic execution.
 
 The `fault-timeout`, `fault-large-output`, `fault-large-stderr` and
 `fault-malformed-json` scenarios are platform negative controls. Their intended

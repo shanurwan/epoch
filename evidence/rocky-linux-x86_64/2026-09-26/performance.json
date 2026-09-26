@@ -1,0 +1,189 @@
+{
+  "api_version": "epoch-performance-summary/v1",
+  "source": "Epoch report elapsed_ns and stage-event elapsed_ns",
+  "percentiles": {
+    "p50": "median",
+    "p95": "nearest-rank"
+  },
+  "limitations": [
+    "The boot/readiness interval combines Firecracker launch, guest boot, PostgreSQL initialization, guest-agent readiness, and the vsock hello handshake.",
+    "Assertions execute inline with step processing, so assertion latency is not independently exposed.",
+    "Evidence is persisted incrementally; only final report persistence after FINISHED is separately derivable."
+  ],
+  "scenarios": {
+    "before-expiry": {
+      "private_disk_and_config_prepare": {
+        "count": 20,
+        "min_ms": 3203.908,
+        "p50_ms": 3217.544,
+        "p95_ms": 3326.171,
+        "max_ms": 3341.445
+      },
+      "firecracker_launch_guest_boot_and_readiness": {
+        "count": 20,
+        "min_ms": 1214.114,
+        "p50_ms": 1214.745,
+        "p95_ms": 1215.548,
+        "max_ms": 1215.579
+      },
+      "guest_clock_step": {
+        "count": 20,
+        "min_ms": 0.401,
+        "p50_ms": 0.55,
+        "p95_ms": 0.724,
+        "max_ms": 0.766
+      },
+      "workload_action_exec": {
+        "count": 20,
+        "min_ms": 26.251,
+        "p50_ms": 27.132,
+        "p95_ms": 40.384,
+        "max_ms": 40.866
+      },
+      "post_execution_collection": {
+        "count": 20,
+        "min_ms": 0.805,
+        "p50_ms": 0.96,
+        "p95_ms": 1.177,
+        "max_ms": 1.231
+      },
+      "cleanup": {
+        "count": 20,
+        "min_ms": 116.635,
+        "p50_ms": 120.218,
+        "p95_ms": 135.232,
+        "max_ms": 142.072
+      },
+      "final_report_persistence": {
+        "count": 20,
+        "min_ms": 2.0,
+        "p50_ms": 2.23,
+        "p95_ms": 2.734,
+        "max_ms": 3.051
+      },
+      "total_run": {
+        "count": 20,
+        "min_ms": 4584.487,
+        "p50_ms": 4611.983,
+        "p95_ms": 4707.142,
+        "max_ms": 4734.016
+      }
+    },
+    "after-expiry": {
+      "private_disk_and_config_prepare": {
+        "count": 20,
+        "min_ms": 3221.332,
+        "p50_ms": 3237.409,
+        "p95_ms": 3262.571,
+        "max_ms": 3319.008
+      },
+      "firecracker_launch_guest_boot_and_readiness": {
+        "count": 20,
+        "min_ms": 1213.805,
+        "p50_ms": 1214.65,
+        "p95_ms": 1215.097,
+        "max_ms": 1215.245
+      },
+      "guest_clock_step": {
+        "count": 20,
+        "min_ms": 0.361,
+        "p50_ms": 0.482,
+        "p95_ms": 0.701,
+        "max_ms": 0.708
+      },
+      "workload_action_exec": {
+        "count": 20,
+        "min_ms": 25.942,
+        "p50_ms": 26.639,
+        "p95_ms": 41.296,
+        "max_ms": 51.168
+      },
+      "post_execution_collection": {
+        "count": 20,
+        "min_ms": 0.684,
+        "p50_ms": 0.826,
+        "p95_ms": 1.001,
+        "max_ms": 1.16
+      },
+      "cleanup": {
+        "count": 20,
+        "min_ms": 117.782,
+        "p50_ms": 121.857,
+        "p95_ms": 133.939,
+        "max_ms": 138.706
+      },
+      "final_report_persistence": {
+        "count": 20,
+        "min_ms": 2.003,
+        "p50_ms": 2.232,
+        "p95_ms": 2.74,
+        "max_ms": 2.781
+      },
+      "total_run": {
+        "count": 20,
+        "min_ms": 4609.344,
+        "p50_ms": 4626.37,
+        "p95_ms": 4664.882,
+        "max_ms": 4698.864
+      }
+    },
+    "toctou": {
+      "private_disk_and_config_prepare": {
+        "count": 20,
+        "min_ms": 3233.477,
+        "p50_ms": 3274.657,
+        "p95_ms": 3302.76,
+        "max_ms": 3347.37
+      },
+      "firecracker_launch_guest_boot_and_readiness": {
+        "count": 20,
+        "min_ms": 1214.091,
+        "p50_ms": 1214.797,
+        "p95_ms": 1215.541,
+        "max_ms": 1215.772
+      },
+      "guest_clock_step": {
+        "count": 20,
+        "min_ms": 0.355,
+        "p50_ms": 0.516,
+        "p95_ms": 0.72,
+        "max_ms": 0.789
+      },
+      "workload_action_exec": {
+        "count": 20,
+        "min_ms": 7030.093,
+        "p50_ms": 7030.427,
+        "p95_ms": 7035.144,
+        "max_ms": 7040.336
+      },
+      "post_execution_collection": {
+        "count": 20,
+        "min_ms": 0.91,
+        "p50_ms": 1.104,
+        "p95_ms": 1.289,
+        "max_ms": 1.57
+      },
+      "cleanup": {
+        "count": 20,
+        "min_ms": 116.647,
+        "p50_ms": 121.621,
+        "p95_ms": 129.437,
+        "max_ms": 129.54
+      },
+      "final_report_persistence": {
+        "count": 20,
+        "min_ms": 1.817,
+        "p50_ms": 2.217,
+        "p95_ms": 2.684,
+        "max_ms": 2.699
+      },
+      "total_run": {
+        "count": 20,
+        "min_ms": 11659.617,
+        "p50_ms": 11699.098,
+        "p95_ms": 11740.019,
+        "max_ms": 11773.589
+      }
+    }
+  }
+}

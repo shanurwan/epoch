@@ -1,7 +1,7 @@
 # Epoch implementation contract
 
-Status: implementation contract for the pre-hardware-validation single-host
-phase. See `implementation-status.md` for actual evidence. The project identity is
+Status: implementation contract for the current single-host phase. See
+`implementation-status.md` for actual evidence. The project identity is
 **Temporal Forking Infrastructure for Deterministic Batch & Expiry Testing**;
 “deterministic” remains a target thesis, not a proven execution claim.
 

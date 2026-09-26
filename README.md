@@ -37,6 +37,13 @@ records exact source and artifact hashes, representative run IDs, host-clock
 safety observations, repeatability counts, measured timings, and limitations.
 Large guest images and raw private run logs remain outside Git.
 
+The isolated MCP/PostgreSQL reference application was subsequently exercised on
+the same class of Rocky Linux host. Its before-expiry, after-expiry, and real
+guest-clock TOCTOU cases each completed 20/20 times with one normalized semantic
+result per case. That evidence is based on revision `710e94b` plus a recorded
+uncommitted patch, so it is explicitly working-tree validation rather than a
+clean-revision acceptance. See the [stateful reference evidence](evidence/rocky-linux-x86_64/2026-09-26/summary.md).
+
 ## Core and reference workloads
 
 Epoch core knows only scenario declarations, guest time control, declared workload
@@ -47,6 +54,7 @@ semantics live in replaceable guest workloads:
 Epoch core
   +-- clock-probe                  system-test fixture
   +-- agent-authority-expiry       one expiry/TOCTOU reference experiment
+  +-- incident-response-agent      isolated MCP/PostgreSQL reference application
   +-- future scheduled-batch
   +-- future subscription-expiry
   +-- future certificate-expiry

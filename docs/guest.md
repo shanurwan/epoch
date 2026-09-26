@@ -143,8 +143,8 @@ around this generic recipe. It takes a marked userspace that already contains an
 offline PostgreSQL package closure, adds only the demo processes and startup
 ordering, and rebuilds the new image without mount or chroot. The generic recipe
 still installs one declared workload binary and has no MCP, JWT, or PostgreSQL
-knowledge. See the demo README for the explicit preparation commands and its
-unverified hardware status.
+knowledge. See the demo README for the explicit preparation commands and the
+scope and provenance of its recorded working-tree hardware exercise.
 
 The output parent must already exist, belong to the ordinary operator and have
 mode 0700. The output directory must not exist. Preparation copies or extracts

@@ -1,0 +1,44 @@
+{
+  "api_version": "epoch-reference-repeatability/v1",
+  "scenarios": [
+    {
+      "scenario": "after-expiry",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_hashes": [
+        "c9b8bfb6ef22b64d3d2adacb20309cc8b70dc890f650525436fb91e8d08b3a90"
+      ],
+      "failed_run_numbers": []
+    },
+    {
+      "scenario": "before-expiry",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_hashes": [
+        "2a4e9dc50cce1c8604ac17227201b4965179d3789ea44336dddac5802f8dc820"
+      ],
+      "failed_run_numbers": []
+    },
+    {
+      "scenario": "toctou",
+      "runs_attempted": 20,
+      "runs_completed": 20,
+      "execution_passes": 20,
+      "assertion_passes": 20,
+      "cleanup_passes": 20,
+      "unique_normalized_result_hashes": 1,
+      "normalized_result_hashes": [
+        "ba7fe07cbed1126d2401796d55d842eabeb34876296da88329e5459e42da1294"
+      ],
+      "failed_run_numbers": []
+    }
+  ]
+}

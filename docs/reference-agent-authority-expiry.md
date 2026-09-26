@@ -2,8 +2,8 @@
 
 This is one application workload demonstrating Epoch's broader expiry and
 execution-boundary testing model. Epoch core remains application-independent and
-contains no autonomous-agent, capability, resource, MCP, NANDA, OpenBao, LLM, or
-chatbot model.
+contains no autonomous-agent, capability, resource, MCP, external authorization,
+LLM, or chatbot model.
 
 ## Research question
 
