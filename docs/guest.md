@@ -138,6 +138,14 @@ The helper also accepts an absolute marked userspace directory in place of the
 squashfs argument. Rocky needs its local squashfs-tools package for extraction;
 the helper never installs packages or invokes administrator elevation itself.
 
+The isolated `demos/incident-response-agent` application has a demo-owned wrapper
+around this generic recipe. It takes a marked userspace that already contains an
+offline PostgreSQL package closure, adds only the demo processes and startup
+ordering, and rebuilds the new image without mount or chroot. The generic recipe
+still installs one declared workload binary and has no MCP, JWT, or PostgreSQL
+knowledge. See the demo README for the explicit preparation commands and its
+unverified hardware status.
+
 The output parent must already exist, belong to the ordinary operator and have
 mode 0700. The output directory must not exist. Preparation copies or extracts
 userspace into a private retained staging directory, writes only inside it, and formats only a

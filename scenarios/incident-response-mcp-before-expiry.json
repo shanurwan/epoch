@@ -1,0 +1,55 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "incident-response-mcp-before-expiry",
+  "image": "epoch-incident-response-agent-v1",
+  "workload": "incident-response-agent",
+  "resources": {
+    "vcpu_count": 1,
+    "memory_mib": 1024
+  },
+  "timeout_ms": 180000,
+  "boot_timeout_ms": 60000,
+  "steps": [
+    {
+      "id": "before-expiry",
+      "op": "clock.set",
+      "at": "2035-01-01T12:00:20Z",
+      "tolerance_ms": 100
+    },
+    {
+      "id": "agent-run",
+      "op": "action.exec",
+      "action": "run",
+      "input": {
+        "scenario": "before-expiry",
+        "agent_id": "incident-agent-01",
+        "authority_scope": "worker.restart",
+        "authority_resource": "payments-worker-17",
+        "not_before": "2035-01-01T12:00:00Z",
+        "expires_at": "2035-01-01T12:00:30Z",
+        "execution_delay_ms": 0
+      },
+      "timeout_ms": 30000
+    }
+  ],
+  "assertions": [
+    {"id": "real-mcp-stdio", "step": "agent-run", "pointer": "/stdout_json/mcp/transport", "op": "eq", "value": "stdio"},
+    {"id": "tools-discovered", "step": "agent-run", "pointer": "/stdout_json/mcp/discovered_tools", "op": "eq", "value": ["incident_inspect", "incident_list", "worker_restart", "worker_status"]},
+    {"id": "restart-requested", "step": "agent-run", "pointer": "/stdout_json/decision/restart_requested", "op": "eq", "value": true},
+    {"id": "restart-tool", "step": "agent-run", "pointer": "/stdout_json/restart/tool", "op": "eq", "value": "worker_restart"},
+    {"id": "restart-resource", "step": "agent-run", "pointer": "/stdout_json/restart/resource", "op": "eq", "value": "payments-worker-17"},
+    {"id": "initial-authorized", "step": "agent-run", "pointer": "/stdout_json/restart/initial_check/decision", "op": "eq", "value": "AUTHORIZED"},
+    {"id": "initial-time-observed", "step": "agent-run", "pointer": "/stdout_json/restart/initial_check/time", "op": "exists"},
+    {"id": "execution-authorized", "step": "agent-run", "pointer": "/stdout_json/restart/execution_check/decision", "op": "eq", "value": "AUTHORIZED"},
+    {"id": "execution-time-observed", "step": "agent-run", "pointer": "/stdout_json/restart/execution_check/time", "op": "exists"},
+    {"id": "side-effect-performed", "step": "agent-run", "pointer": "/stdout_json/restart/side_effect_performed", "op": "eq", "value": true},
+    {"id": "database-before-zero", "step": "agent-run", "pointer": "/stdout_json/worker_before/restart_count", "op": "eq", "value": 0},
+    {"id": "database-after-one", "step": "agent-run", "pointer": "/stdout_json/worker_after/restart_count", "op": "eq", "value": 1},
+    {"id": "transaction-before-zero", "step": "agent-run", "pointer": "/stdout_json/restart/worker/restart_count_before", "op": "eq", "value": 0},
+    {"id": "transaction-after-one", "step": "agent-run", "pointer": "/stdout_json/restart/worker/restart_count_after", "op": "eq", "value": 1},
+    {"id": "database-after-healthy", "step": "agent-run", "pointer": "/stdout_json/worker_after/health", "op": "eq", "value": "healthy"},
+    {"id": "audit-authorized", "step": "agent-run", "pointer": "/stdout_json/restart/audit/decision", "op": "eq", "value": "AUTHORIZED"},
+    {"id": "audit-side-effect", "step": "agent-run", "pointer": "/stdout_json/restart/audit/side_effect_performed", "op": "eq", "value": true},
+    {"id": "audit-time-observed", "step": "agent-run", "pointer": "/stdout_json/restart/audit/occurred_at", "op": "exists"}
+  ]
+}

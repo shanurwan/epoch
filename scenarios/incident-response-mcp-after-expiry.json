@@ -1,0 +1,49 @@
+{
+  "api_version": "epoch/v1alpha1",
+  "name": "incident-response-mcp-after-expiry",
+  "image": "epoch-incident-response-agent-v1",
+  "workload": "incident-response-agent",
+  "resources": {
+    "vcpu_count": 1,
+    "memory_mib": 1024
+  },
+  "timeout_ms": 180000,
+  "boot_timeout_ms": 60000,
+  "steps": [
+    {
+      "id": "after-expiry",
+      "op": "clock.set",
+      "at": "2035-01-01T12:00:31Z",
+      "tolerance_ms": 100
+    },
+    {
+      "id": "agent-run",
+      "op": "action.exec",
+      "action": "run",
+      "input": {
+        "scenario": "after-expiry",
+        "agent_id": "incident-agent-01",
+        "authority_scope": "worker.restart",
+        "authority_resource": "payments-worker-17",
+        "not_before": "2035-01-01T12:00:00Z",
+        "expires_at": "2035-01-01T12:00:30Z",
+        "execution_delay_ms": 0
+      },
+      "timeout_ms": 30000
+    }
+  ],
+  "assertions": [
+    {"id": "real-mcp-stdio", "step": "agent-run", "pointer": "/stdout_json/mcp/transport", "op": "eq", "value": "stdio"},
+    {"id": "restart-requested", "step": "agent-run", "pointer": "/stdout_json/decision/restart_requested", "op": "eq", "value": true},
+    {"id": "initial-expired", "step": "agent-run", "pointer": "/stdout_json/restart/initial_check/decision", "op": "eq", "value": "DENY_EXPIRED"},
+    {"id": "initial-time-observed", "step": "agent-run", "pointer": "/stdout_json/restart/initial_check/time", "op": "exists"},
+    {"id": "execution-not-reached", "step": "agent-run", "pointer": "/stdout_json/restart/execution_check", "op": "absent"},
+    {"id": "side-effect-denied", "step": "agent-run", "pointer": "/stdout_json/restart/side_effect_performed", "op": "eq", "value": false},
+    {"id": "database-before-zero", "step": "agent-run", "pointer": "/stdout_json/worker_before/restart_count", "op": "eq", "value": 0},
+    {"id": "database-after-zero", "step": "agent-run", "pointer": "/stdout_json/worker_after/restart_count", "op": "eq", "value": 0},
+    {"id": "database-still-unhealthy", "step": "agent-run", "pointer": "/stdout_json/worker_after/health", "op": "eq", "value": "unhealthy"},
+    {"id": "audit-expired", "step": "agent-run", "pointer": "/stdout_json/restart/audit/decision", "op": "eq", "value": "DENY_EXPIRED"},
+    {"id": "audit-no-side-effect", "step": "agent-run", "pointer": "/stdout_json/restart/audit/side_effect_performed", "op": "eq", "value": false},
+    {"id": "audit-time-observed", "step": "agent-run", "pointer": "/stdout_json/restart/audit/occurred_at", "op": "exists"}
+  ]
+}

@@ -1,0 +1,6 @@
+[Unit]
+Description=Epoch incident-response reference target
+DefaultDependencies=no
+Requires=incident-postgres-ready.service epoch-agent.service
+After=incident-postgres-ready.service epoch-agent.service
+AllowIsolate=yes

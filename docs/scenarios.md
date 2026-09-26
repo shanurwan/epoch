@@ -110,6 +110,13 @@ workload-local restart side effect occurred. These scenarios use the separate
 `agent-authority-expiry` workload; no domain fields were added to the scenario
 schema or engine. See `reference-agent-authority-expiry.md`.
 
+The `incident-response-mcp-before-expiry`, `incident-response-mcp-after-expiry`,
+and `incident-response-mcp-toctou` scenarios exercise the isolated
+`demos/incident-response-agent` application through the same generic action and
+assertion boundary. That application uses real MCP stdio calls and an in-guest
+PostgreSQL side effect; none of its domain types or dependencies are part of
+Epoch core. These scenarios have not yet been hardware-verified.
+
 The `fault-timeout`, `fault-large-output`, `fault-large-stderr` and
 `fault-malformed-json` scenarios are platform negative controls. Their intended
 result is execution ERROR, not an application assertion failure or a passing

@@ -1,0 +1,35 @@
+[Unit]
+Description=Incident reference PostgreSQL (Unix socket only)
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=incident-postgres-ready.service shutdown.target
+
+[Service]
+Type=simple
+User=postgres
+Group=epoch-workload
+SupplementaryGroups=postgres
+UMask=0077
+RuntimeDirectory=postgresql
+RuntimeDirectoryMode=0770
+ExecStartPre=/opt/epoch/bin/incident-postgres-bootstrap init
+ExecStart=/usr/lib/postgresql/16/bin/postgres -D /var/lib/postgresql/epoch
+Restart=no
+TimeoutStartSec=45s
+TimeoutStopSec=15s
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/postgresql /run/postgresql
+LockPersonality=yes
+LimitCORE=0
+StandardInput=null
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/console
+TTYReset=no
+TTYVHangup=no

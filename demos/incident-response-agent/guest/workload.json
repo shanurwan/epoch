@@ -1,0 +1,19 @@
+{
+  "api_version": "epoch-workload/v1",
+  "id": "incident-response-agent",
+  "version": "1",
+  "uid": 10001,
+  "gid": 10001,
+  "working_dir": "/var/lib/epoch-workload",
+  "environment": {
+    "TZ": "UTC"
+  },
+  "actions": {
+    "run": {
+      "argv": [
+        "/usr/local/libexec/incident-response-agent"
+      ]
+    }
+  },
+  "services": {}
+}

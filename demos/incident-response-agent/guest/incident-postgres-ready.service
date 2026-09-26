@@ -1,0 +1,32 @@
+[Unit]
+Description=Prepare deterministic incident reference database
+DefaultDependencies=no
+Requires=incident-postgres.service
+After=incident-postgres.service
+Before=epoch-agent.service
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+SupplementaryGroups=epoch-workload
+UMask=0077
+ExecStart=/opt/epoch/bin/incident-postgres-bootstrap prepare
+RemainAfterExit=yes
+TimeoutStartSec=45s
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/postgresql /run/postgresql
+LockPersonality=yes
+LimitCORE=0
+StandardInput=null
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/console
+TTYReset=no
+TTYVHangup=no

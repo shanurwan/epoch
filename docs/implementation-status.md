@@ -22,6 +22,7 @@ host certification, or deterministic execution of arbitrary Linux systems.
 | Guest clock guards and readback | Yes | Pass with fake syscall boundary | Real guest `CLOCK_REALTIME` change and readback VERIFIED |
 | Guest actions and services | Yes | Pass, including descendants, races, deadlines, nonzero exits and quotas | Real systemd guest and UID 10001 workload execution VERIFIED |
 | Agent-authority-expiry reference workload | Yes | Unit and boundary tests pass | Before, after and execution-time revalidation scenarios VERIFIED |
+| Isolated incident-response MCP/PostgreSQL reference application | Yes | Demo-module authority, handler, structured MCP and deterministic-decision tests pass | NOT TESTED on Firecracker hardware |
 | Evidence, outcome precedence and recovery | Yes | Pass, including quota, publication and interruption cases | Final evidence and independent successful outcomes VERIFIED; abrupt interruption remains software-tested only |
 | Offline guest-image helper and systemd recipe | Yes | Syntax and safety checks pass | Two workload-specific images prepared and booted successfully |
 | Explicit nine-scenario clock-probe KVM harness | Yes | Predicates and failure variants pass | Full harness NOT TESTED; the smaller `clock-smoke.json` gate passed |
@@ -63,6 +64,12 @@ The authority runs observed `AUTHORIZED` with a simulated side effect before
 expiry, `DENY_EXPIRED` without a side effect after expiry, and a TOCTOU transition
 from an accepted `AUTHORIZED` request to `DENY_EXPIRED` at the later execution
 boundary with restart count zero.
+
+The separate `demos/incident-response-agent` application is not part of this
+accepted hardware set. Its PostgreSQL-in-guest image extension and three
+`incident-response-mcp-*` scenarios remain implemented/software-tested only until
+new hardware evidence records successful guest startup, MCP calls, database
+transitions, audits, assertions, and cleanup.
 
 ## Scoped repeatability and timings
 
